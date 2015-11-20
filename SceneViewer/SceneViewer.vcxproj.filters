@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="RawPrimitive.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderable.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Inputs.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="DataStructures.hpp">
+      <Filter>structs</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering.cpp">
+      <Filter>rendering</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Mesh.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="RawPrimitive.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderable.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Inputs.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="dataArrays.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering.h">
+      <Filter>rendering</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\batchNormalsVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\batchOutlineVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\batchVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\batchVertexExplode.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\deferredLightingFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\fragmentBlinnPong.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\gaussBlurFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\gaussBlurVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\gBufferFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\geometryExplode.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\glyphFrahment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\glyphVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\normalsFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\normalsGeometry.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\normalsVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\outlineFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\outlineVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\pointShadowBatchVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\pointShadowFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\pointShadowGeometry.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\pointShadowVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\rawcolorfragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\rawcolorvertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentBlur.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentEdge.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentGrayScale.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentHalves.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentInversion.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentKernel.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenFragmentNoBloomy.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\screenVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadowBatchVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadowFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\shadowVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\skyBoxFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\skyBoxVertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\vertex.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\vertexExplode.glsl">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="renderables">
+      <UniqueIdentifier>{09f8f800-252b-4789-8f27-71b06ad09944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{46a255f9-9221-4b32-b3fb-311cc1345d51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{e948bf04-f2db-4ae3-b5f1-f7cfce5270bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="structs">
+      <UniqueIdentifier>{1b7ffa72-c55e-44da-bf32-a85cbbfcca25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{35d2d911-fb40-43ab-9de0-79d3d9e78306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rendering">
+      <UniqueIdentifier>{aea90366-ea56-42dc-9746-20bb096ab0b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

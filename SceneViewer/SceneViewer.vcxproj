@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{636C8D04-85F7-4EC9-B044-F4F4BD6F081F}</ProjectGuid>
+    <RootNamespace>SceneViewer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\NSF001\Dropbox\Muh Code\Cpp\global\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\NSF001\Dropbox\Muh Code\Cpp\global\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\NSF001\Dropbox\Muh Code\Cpp\global\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\NSF001\Dropbox\Muh Code\Cpp\global\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimpd.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimpd.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DataStructures.hpp" />
+    <ClCompile Include="Inputs.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="RawPrimitive.cpp" />
+    <ClCompile Include="Renderable.cpp" />
+    <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="Shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="dataArrays.h" />
+    <ClInclude Include="Inputs.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="RawPrimitive.h" />
+    <ClInclude Include="Renderable.h" />
+    <ClInclude Include="rendering.h" />
+    <ClInclude Include="Shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\batchNormalsVertex.glsl" />
+    <None Include="shaders\batchOutlineVertex.glsl" />
+    <None Include="shaders\batchVertex.glsl" />
+    <None Include="shaders\batchVertexExplode.glsl" />
+    <None Include="shaders\fragmentBlinnPong.glsl" />
+    <None Include="shaders\gaussBlurFragment.glsl" />
+    <None Include="shaders\gaussBlurVertex.glsl" />
+    <None Include="shaders\gBufferFragment.glsl" />
+    <None Include="shaders\deferredLightingFragment.glsl" />
+    <None Include="shaders\geometryExplode.glsl" />
+    <None Include="shaders\glyphFrahment.glsl" />
+    <None Include="shaders\glyphVertex.glsl" />
+    <None Include="shaders\normalsFragment.glsl" />
+    <None Include="shaders\normalsGeometry.glsl" />
+    <None Include="shaders\normalsVertex.glsl" />
+    <None Include="shaders\pointShadowBatchVertex.glsl" />
+    <None Include="shaders\pointShadowFragment.glsl" />
+    <None Include="shaders\pointShadowGeometry.glsl" />
+    <None Include="shaders\pointShadowVertex.glsl" />
+    <None Include="shaders\screenFragment.glsl" />
+    <None Include="shaders\screenFragmentBlur.glsl" />
+    <None Include="shaders\screenFragmentEdge.glsl" />
+    <None Include="shaders\screenFragmentGrayScale.glsl" />
+    <None Include="shaders\screenFragmentHalves.glsl" />
+    <None Include="shaders\screenFragmentInversion.glsl" />
+    <None Include="shaders\screenFragmentKernel.glsl" />
+    <None Include="shaders\screenFragmentNoBloomy.glsl" />
+    <None Include="shaders\screenVertex.glsl" />
+    <None Include="shaders\outlineFragment.glsl" />
+    <None Include="shaders\outlineVertex.glsl" />
+    <None Include="shaders\rawcolorfragment.glsl" />
+    <None Include="shaders\rawcolorvertex.glsl" />
+    <None Include="shaders\shadowBatchVertex.glsl" />
+    <None Include="shaders\shadowFragment.glsl" />
+    <None Include="shaders\shadowVertex.glsl" />
+    <None Include="shaders\skyBoxFragment.glsl" />
+    <None Include="shaders\skyBoxVertex.glsl" />
+    <None Include="shaders\vertex.glsl" />
+    <None Include="shaders\vertexExplode.glsl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
