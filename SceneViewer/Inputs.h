@@ -13,6 +13,8 @@ public:
 	static GLfloat yoffset;
 	static GLboolean firstMouse;
 
+	static GLboolean mouseCapture;
+
 	static GLdouble xScroll;
 	static GLdouble yScroll;
 

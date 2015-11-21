@@ -74,8 +74,11 @@ void Camera::step(GLdouble time, GLdouble deltaTime)
 		fov = 100.0f;
 
 	//Yaw, itch, rotatin camer fps-style on mouse movement
-	yaw += Inputs::xoffset;
-	pitch += Inputs::yoffset;
+	if (Inputs::mouseCapture)
+	{
+		yaw += Inputs::xoffset;
+		pitch += Inputs::yoffset;
+	}
 
 	if (pitch > 89.0f)
 		pitch = 89.0f;

@@ -10,6 +10,8 @@
 
 /*static*/ GLboolean Inputs::firstMouse = true;
 
+/*static*/ GLboolean Inputs::mouseCapture = false;
+
 /*static*/ GLdouble Inputs::xScroll = 0;
 /*static*/ GLdouble Inputs::yScroll = 0;
 

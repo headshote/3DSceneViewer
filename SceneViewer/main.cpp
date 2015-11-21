@@ -164,7 +164,7 @@ GLFWwindow* setUpWindow(int width, int height)
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	//Next we're required to create a window object.
-	GLFWwindow* window = glfwCreateWindow(width, height, "Advanced OpenGL", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Scene Viewer", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -188,7 +188,14 @@ GLFWwindow* setUpWindow(int width, int height)
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode){
+		std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;
+		if (button == GLFW_MOUSE_BUTTON_1 || button == GLFW_MOUSE_BUTTON_3)
+		{
+			Inputs::mouseCapture = action == GLFW_PRESS;
+			glfwSetInputMode(window, GLFW_CURSOR, Inputs::mouseCapture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+		}
+	});
 
 	return window;
 }
@@ -351,7 +358,7 @@ void pointLight(GLuint shaderProgram, const glm::vec3& lightColor, glm::vec3& li
 
 	//calculate light volume
 	GLfloat lightMax = std::fmaxf(std::fmaxf(lightColor.r, lightColor.g), lightColor.b);
-	GLfloat radius = (-kl + std::sqrtf(kl * kl - 4 * kq * (kc - (256.0 / 5.0) * lightMax))) / (2 * kq);
+	GLfloat radius = (-kl + std::sqrtf(kl * kl - 4 * kq * (kc - (256.0f / 5.0f) * lightMax))) / (2.0f * kq);
 	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".radius").c_str()), radius);
 }
 
@@ -1059,8 +1066,8 @@ void renderText(GLuint shader, GLuint quadVAO, GLuint quadVBO, std::map<GLchar, 
 		GLfloat xpos = x + ch.bearing.x;
 		GLfloat ypos = y - (ch.size.y - ch.bearing.y);
 
-		GLfloat w = ch.size.x;
-		GLfloat h = ch.size.y;
+		GLint w = ch.size.x;
+		GLint h = ch.size.y;
 		// Update VBO for each character
 		GLfloat vertices[24] = {
 			 xpos, ypos + h, 0.0, 0.0 ,
@@ -1311,10 +1318,10 @@ int main()
 		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;
 		
 		//for main shader (individual draw calls)
-		setLightingParameters(mainShader, currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
 			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 		//for batch rendering shader
-		setLightingParameters(mainBatchShader, currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
 			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
@@ -1391,7 +1398,7 @@ int main()
 
 			//render gbuffuer data to fullscreen quad, perform lighting/shadow calculations per-pixel, basically, 
 			//instead of for all the fragments for all the vertices in the screen
-			setLightingParameters(theDeferredtingShader->getProgramId(), currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+			setLightingParameters(theDeferredtingShader->getProgramId(), (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
 				theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 			renderGBufferData(theDeferredtingShader->getProgramId(), gBufferTextures, sizeof(gBufferTextures) / sizeof(GLuint),
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));

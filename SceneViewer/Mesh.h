@@ -19,7 +19,7 @@ public:
 
 	void dispose();
 protected:
-	GLuint EBO = -1;
+	GLuint EBO = UINT_MAX;
 
 	bool indexedMode = false;
 
