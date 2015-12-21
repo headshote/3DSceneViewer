@@ -24,104 +24,17 @@ Mesh::Mesh(GLfloat* vertices, GLuint numvertices, GLuint* meshTextures, GLuint n
 	}
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> meshTextures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> meshTextures) : textures(meshTextures)
 {
 	loadVertices(vertices, indices);
-
-	textures = meshTextures;
 }
 
 Mesh::~Mesh()
-{
-}
-
-void Mesh::dispose()
 {
 	if (EBO < (GLuint)-1)
 		glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
-}
-
-/**
-	Render things
-*/
-void Mesh::drawCall(GLuint shaderprogram)
-{	
-	GLboolean normalAvailable = false;
-	GLboolean parallaxAvailable = false;
-
-	for (GLuint i = 0; i < textures.size(); i++)
-	{
-		std::string materialVar;
-
-		if (textures[i].type == "texture_diffuse")
-		{
-			materialVar = "material.diffuse";
-		}
-		else if (textures[i].type == "texture_specular")
-		{
-			materialVar = "material.specular";
-		}
-		else if (textures[i].type == "texture_normal")
-		{
-			materialVar = "material.normalMap";
-			normalAvailable = true;
-		}
-		else if (textures[i].type == "texture_depth")
-		{
-			materialVar = "material.depthMap";
-			parallaxAvailable = true;
-		}
-
-		setModelTexture(shaderprogram, textures[i].id, materialVar.c_str(), i);
-	}
-
-	glUniform1i(glGetUniformLocation(shaderprogram, "material.normalAvailable"), normalAvailable);
-	glUniform1i(glGetUniformLocation(shaderprogram, "material.parallaxAvailable"), parallaxAvailable);
-
-	setModelMaterial(shaderprogram, 32.0f, textures[0].transparency);
-	
-	renderMeshCall(shaderprogram, VAO, nRenderingElemts);
-}
-
-void Mesh::drawBatch(GLuint shederprogram, GLuint numDrawCalls)
-{
-	GLboolean normalAvailable = false;
-	GLboolean parallaxAvailable = false;
-
-	for (GLuint i = 0; i < textures.size(); i++)
-	{
-		std::string materialVar;
-
-		if (textures[i].type == "texture_diffuse")
-		{
-			materialVar = "material.diffuse";
-		}
-		else if (textures[i].type == "texture_specular")
-		{
-			materialVar = "material.specular";
-		}
-		else if (textures[i].type == "texture_normal")
-		{
-			materialVar = "material.normalMap";
-			normalAvailable = true;
-		}
-		else if (textures[i].type == "texture_depth")
-		{
-			materialVar = "material.depthMap";
-			parallaxAvailable = true;
-		}
-
-		setModelTexture(shederprogram, textures[i].id, materialVar.c_str(), i);
-	}
-
-	glUniform1i(glGetUniformLocation(shederprogram, "material.normalAvailable"), normalAvailable);
-	glUniform1i(glGetUniformLocation(shederprogram, "material.parallaxAvailable"), parallaxAvailable);
-
-	setModelMaterial(shederprogram, 96.0f, textures[0].transparency);
-
-	batchRenderMesh(shederprogram, VAO, nRenderingElemts, numDrawCalls);
 }
 
 /**
@@ -297,11 +210,52 @@ void Mesh::loadVertices(const std::vector<Vertex>& vertices, const std::vector<G
 	indexedMode = true;
 }
 
+void Mesh::setUpMaterial(GLuint shaderprogram)
+{
+
+	GLboolean normalAvailable = false;
+	GLboolean parallaxAvailable = false;
+
+	for (GLuint i = 0; i < textures.size(); i++)
+	{
+		std::string materialVar;
+
+		if (textures[i].type == "texture_diffuse")
+		{
+			materialVar = "material.diffuse";
+		}
+		else if (textures[i].type == "texture_specular")
+		{
+			materialVar = "material.specular";
+		}
+		else if (textures[i].type == "texture_normal")
+		{
+			materialVar = "material.normalMap";
+			normalAvailable = true;
+		}
+		else if (textures[i].type == "texture_depth")
+		{
+			materialVar = "material.depthMap";
+			parallaxAvailable = true;
+		}
+
+		setModelTexture(shaderprogram, textures[i].id, materialVar.c_str(), i);
+	}
+
+	glUniform1i(glGetUniformLocation(shaderprogram, "material.normalAvailable"), normalAvailable);
+	glUniform1i(glGetUniformLocation(shaderprogram, "material.parallaxAvailable"), parallaxAvailable);
+
+	setModelMaterial(shaderprogram, 32.0f, textures[0].transparency);
+}
+
 /**
 	Using shaderProgram, and Vector Array Object, make a draw call for OpenGL to render all our vertices
 */
-void Mesh::renderMeshCall(GLuint shaderProgram, GLuint VAO, GLuint numelements)
+void Mesh::renderVAO(GLuint shaderprogram, GLuint VAO, GLuint numelements)
 {
+	setUpMaterial(shaderprogram);
+	///
+
 	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
 	glBindVertexArray(VAO);
 
@@ -315,11 +269,14 @@ void Mesh::renderMeshCall(GLuint shaderProgram, GLuint VAO, GLuint numelements)
 }
 
 /**
-	Using shaderProgram, and Vector Array Object, make OpenGL to render all our vertices, several times in one call
+Using shaderProgram, and Vector Array Object, make OpenGL to render all our vertices, several times in one call
 */
-void Mesh::batchRenderMesh(GLuint shaderProgram, GLuint VAO, GLuint numelements, GLuint numCalls)
+void Mesh::batchRenderVAO(GLuint shederprogram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode)
 {
-	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
+	setUpMaterial(shederprogram);
+	///
+
+	GLenum rMode = dotMode ? GL_POINTS : GL_TRIANGLES;
 	glBindVertexArray(VAO);
 
 	if (indexedMode)

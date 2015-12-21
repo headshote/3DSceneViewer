@@ -15,6 +15,10 @@
 class Model
 {
 public:
+	Model(const GLchar* filePath, GLboolean useNormalMaps = false);
+	Model(Renderable* renderable);
+	~Model();
+
 	static GLuint loadTexture(const GLchar* filePath, GLboolean isTransparent = false, GLboolean gammaCorrect = false);
 
 	void setTranslation(glm::vec3 translation);
@@ -26,24 +30,20 @@ public:
 	glm::vec3 getRotationAxis();
 	GLfloat getRotationAngle();
 
-	Model(const GLchar* filePath, GLboolean useNormalMaps = false);
-	Model(Renderable* renderable);
-	~Model();
-
 	void drawCall(GLuint shaderProgram);
 	void drawOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR = 0.43f, GLfloat outlineG = 0.28f, GLfloat outlineB = 0.06f);
 
 	void scheduleRendering();
 	void flushScheduledInstances();
+
 	void batchRenderScheduledInstances(GLuint shaderProgram);
 	void batchRenderOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR = 0.43f, GLfloat outlineG = 0.28f, GLfloat outlineB = 0.06f);
 
 	void translateBy(const glm::vec3& translation);
 	void scaleBy(const glm::vec3& scale);
 	void rotateBy(const glm::vec3& rotationAxis, GLfloat angle);
-
-	void dispose();
 protected:
+private:
 	std::vector<Texture> textures_loaded;
 
 	std::vector<std::shared_ptr<Renderable>> meshes;
@@ -58,7 +58,7 @@ protected:
 	std::vector<glm::mat4> batchedInstanceTransforms;
 
 	glm::mat4 transformation;	//model transformation
-private:
+
 	void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value);
 
 	void initialize();

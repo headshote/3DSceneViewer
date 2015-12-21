@@ -8,3 +8,16 @@ GLuint Renderable::getVAO()
 Renderable::Renderable()
 {
 }
+
+/**
+Render things
+*/
+void Renderable::drawCall(GLuint shederprogram)
+{
+	renderVAO(shederprogram, VAO, nRenderingElemts);
+}
+
+void Renderable::drawBatch(GLuint shederprogram, GLuint numDrawCalls)
+{
+	batchRenderVAO(shederprogram, VAO, nRenderingElemts, numDrawCalls, rendering::dotMode);
+}

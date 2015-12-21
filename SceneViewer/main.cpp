@@ -146,14 +146,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	Inputs::onScroll(xoffset, yoffset);	
 }
 
-void sillyProcedure()
-{
-	std::vector<int> v = { 12, 6, 8, 41, 9, 33 };
-	std::sort(v.begin(), v.end(), [](int i, int j){return i < j; });
-	for (int& i : v)
-		std::cout << i << std::endl;
-}
-
 GLFWwindow* setUpWindow(int width, int height)
 {
 	//instantiate the GLFW window
@@ -1095,8 +1087,6 @@ void renderText(GLuint shader, GLuint quadVAO, GLuint quadVBO, std::map<GLchar, 
 
 int main()
 {
-	sillyProcedure();
-
 	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (window == nullptr)
 	{
@@ -1171,8 +1161,10 @@ int main()
 	GLuint gBuffer = makeFrameBuffer(gBufferTextures, gBufferTextrsParams, sizeof(gBufferTextures) / sizeof(GLuint), false, false);
 
 	//This vao, contains the quad in NDC, which will have the FBO texture applied to it
-	GLuint renderingQuad = RawPrimitive(dataArrays::quadVertices, sizeof(dataArrays::quadVertices)).getVAO();
-	GLuint renderingMiniQuad = RawPrimitive(dataArrays::cornerQuadVertices, sizeof(dataArrays::cornerQuadVertices)).getVAO();
+	RawPrimitive rq(dataArrays::quadVertices, sizeof(dataArrays::quadVertices));
+	GLuint renderingQuad = rq.getVAO();
+	RawPrimitive rmq(dataArrays::cornerQuadVertices, sizeof(dataArrays::cornerQuadVertices));
+	GLuint renderingMiniQuad = rmq.getVAO();
 
 	//Load the models
 	std::vector<Model> models;
@@ -1221,7 +1213,8 @@ int main()
 		"textures/cubemap/mnight_lf.jpg", "textures/cubemap/mnight_up.jpg", "textures/cubemap/mnight_dn.jpg", 
 		"textures/cubemap/mnight_bk.jpg", "textures/cubemap/mnight_ft.jpg" });
 	//when we pass vec3 to RawPrimitive constructor, it loads vertices as if 3d positions for a primitive, that is supposed to be rendered in one color
-	GLuint skyboxVAO = RawPrimitive(dataArrays::skyboxVertices, sizeof(dataArrays::skyboxVertices), glm::vec3()).getVAO();
+	RawPrimitive sb(dataArrays::skyboxVertices, sizeof(dataArrays::skyboxVertices), glm::vec3());
+	GLuint skyboxVAO = sb.getVAO();
 
 	//create frame buffer to render the shadow map
 	ShadowMap directionalShadowmap = generateDirShadowRBuffer();
@@ -1454,12 +1447,6 @@ int main()
 
 		Inputs::step(currentTime, deltaTime);
 	}
-
-	for (GLuint i = 0; i < models.size(); i++)
-		models[i].dispose();
-
-	for (GLuint i = 0; i < primitives.size(); i++)
-		primitives[i].dispose();
 
 	//When we're done with all framebuffer operations, do not forget to delete the framebuffer object
 	glDeleteFramebuffers(1, &sceneFBO);

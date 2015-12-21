@@ -81,12 +81,6 @@ void Model::rotateBy(const glm::vec3& rotationAxis, GLfloat angle)
 	transformation = glm::rotate(transformation, angle, rotationAxis);
 }
 
-void Model::dispose()
-{
-	for (GLuint i = 0; i < meshes.size(); i++)
-		meshes[i]->dispose();
-}
-
 void Model::drawCall(GLuint shaderProgram)
 {
 	setUniformMaxtrix(shaderProgram, "model", transformation);

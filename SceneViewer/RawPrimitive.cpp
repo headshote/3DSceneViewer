@@ -20,17 +20,14 @@ RawPrimitive::RawPrimitive(GLfloat* vertices, GLuint verticesSize)
 
 RawPrimitive::~RawPrimitive()
 {
-}
-
-void RawPrimitive::drawCall(GLuint shederprogram)
-{
-	renderRawPrimitive(shederprogram, VAO, nRenderingElemts, color);
-}
-
-void RawPrimitive::dispose()
-{
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
+}
+
+void RawPrimitive::setShaderColor(GLuint shaderProgram, const glm::vec3& primitiveColor)
+{
+	//set color
+	glUniform3f(glGetUniformLocation(shaderProgram, "lsColor"), primitiveColor.x, primitiveColor.y, primitiveColor.z);
 }
 
 /**
@@ -108,15 +105,14 @@ GLuint RawPrimitive::load2DTexturedVertices(GLfloat* vertices, GLuint sizeOfVert
 /**
 	Renders raw (no textures, or normals) primitive as a wireframe
 */
-void RawPrimitive::renderRawPrimitive(GLuint shaderProgram, GLuint VAO, GLuint numelements, const glm::vec3& primitiveColor)
+void RawPrimitive::renderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements)
 {
+	setShaderColor(shaderProgram, color);
+
 	//Wireframe on
 	GLint polygonMode;
 	glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	//set color
-	glUniform3f(glGetUniformLocation(shaderProgram, "lsColor"), primitiveColor.x, primitiveColor.y, primitiveColor.z);
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, numelements);
@@ -125,4 +121,9 @@ void RawPrimitive::renderRawPrimitive(GLuint shaderProgram, GLuint VAO, GLuint n
 	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 
 	glBindVertexArray(0);
+}
+
+void RawPrimitive::batchRenderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode)
+{
+
 }
