@@ -1,18 +1,36 @@
 #include "Model.h"
 
-void Model::setTranslation(glm::vec3 translation)
+Model::Model(const GLchar* filePath, const GLboolean useNormalMaps)
+{
+	loadModel(filePath, useNormalMaps);
+
+	initialize();
+}
+
+Model::Model(Renderable* renderable)
+{
+	meshes.push_back(std::shared_ptr<Renderable>(renderable));
+
+	initialize();
+}
+
+Model::~Model()
+{
+}
+
+void Model::setTranslation(const glm::vec3 translation)
 {
 	mTranslation = translation;
 	updateTransformation();
 }
 
-void Model::setScale(glm::vec3 scale)
+void Model::setScale(const glm::vec3 scale)
 {
 	mScale = scale;
 	updateTransformation();
 }
 
-void Model::setRotation(glm::vec3 rotationAxis, GLfloat angle)
+void Model::setRotation(const glm::vec3 rotationAxis, const GLfloat angle)
 {
 	mRotation = angle;
 	mRotationAxis = rotationAxis;
@@ -39,24 +57,6 @@ GLfloat Model::getRotationAngle()
 	return mRotation;
 }
 
-Model::Model(const GLchar* filePath, GLboolean useNormalMaps)
-{
-	loadModel(filePath, useNormalMaps);
-
-	initialize();
-}
-
-Model::Model(Renderable* renderable)
-{
-	meshes.push_back(std::shared_ptr<Renderable>(renderable));
-
-	initialize();
-}
-
-Model::~Model()
-{
-}
-
 void Model::initialize()
 {
 	mTranslation = glm::vec3(0.0f);
@@ -76,12 +76,12 @@ void Model::scaleBy(const glm::vec3& scale)
 	transformation = glm::scale(transformation, scale);
 }
 
-void Model::rotateBy(const glm::vec3& rotationAxis, GLfloat angle)
+void Model::rotateBy(const glm::vec3& rotationAxis, const GLfloat angle)
 {
 	transformation = glm::rotate(transformation, angle, rotationAxis);
 }
 
-void Model::drawCall(GLuint shaderProgram)
+void Model::drawCall(const GLuint shaderProgram)
 {
 	setUniformMaxtrix(shaderProgram, "model", transformation);
 
@@ -89,7 +89,7 @@ void Model::drawCall(GLuint shaderProgram)
 		meshes[i]->drawCall(shaderProgram);
 }
 
-void Model::drawOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR, GLfloat outlineG, GLfloat outlineB)
+void Model::drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR, const GLfloat outlineG, const GLfloat outlineB)
 {
 	//We first want to enable stencil testing and set the actions to take whenever any of the tests succeed or fail
 	glEnable(GL_STENCIL_TEST);
@@ -194,13 +194,13 @@ void Model::flushScheduledInstances()
 	}
 }
 
-void Model::batchRenderScheduledInstances(GLuint shaderProgram)
+void Model::batchRenderScheduledInstances(const GLuint shaderProgram)
 {
 	for (GLuint i = 0; i < meshes.size(); i++)
 		meshes[i]->drawBatch(shaderProgram, batchedInstanceTransforms.size());
 }
 
-void Model::batchRenderOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR, GLfloat outlineG, GLfloat outlineB)
+void Model::batchRenderOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR, const GLfloat outlineG, const GLfloat outlineB)
 {
 	//We first want to enable stencil testing and set the actions to take whenever any of the tests succeed or fail
 	glEnable(GL_STENCIL_TEST);
@@ -262,7 +262,7 @@ void Model::updateTransformation()
 	transformation = trans;
 }
 
-void Model::setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value)
+void Model::setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value)
 {
 	GLint uniform = glGetUniformLocation(shaderProgram, uniformName);
 	glUniformMatrix4fv(uniform, 1,
@@ -274,7 +274,7 @@ void Model::setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const g
 	Fills meshes vector with renderable meshes, that contalin data about mesh textures (their texture objects and texture coordinates for vertices), 
 	vertex coordinates	and vertex normals
 */
-void Model::loadModel(const std::string& filePath, GLboolean useNormalMaps)
+void Model::loadModel(const std::string& filePath, const GLboolean useNormalMaps)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace );
@@ -287,7 +287,7 @@ void Model::loadModel(const std::string& filePath, GLboolean useNormalMaps)
 	processNode(scene->mRootNode, scene, useNormalMaps, filePath.substr(0, filePath.find_last_of('/')));
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir)
+void Model::processNode(aiNode* node, const aiScene* scene, const GLboolean useNormalMaps, const std::string& modelRootDir)
 {
 	// Process all the node's meshes (if any)
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
@@ -309,7 +309,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, GLboolean useNormalM
 /**
 	Creates Mesh object from an asimp mesh
 */
-Mesh* Model::createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir)
+Mesh* Model::createMesh(aiMesh* mesh, const aiScene* scene, const GLboolean useNormalMaps, const std::string& modelRootDir)
 {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
@@ -423,9 +423,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 }
 
 /**
-	Load texture from file
+	Load texture from file, a non-member function, that is packaged along with the Model class
 */
-/*static*/ GLuint Model::loadTexture(const GLchar* filePath, GLboolean isTransparent, GLboolean gammaCorrect)
+GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent, const GLboolean gammaCorrect)
 {
 	int width, height;
 	unsigned char* image = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGBA);

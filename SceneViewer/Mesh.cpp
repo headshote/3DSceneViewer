@@ -1,8 +1,8 @@
 #include "Mesh.h"
 
-Mesh::Mesh(GLfloat* vertices, GLuint numvertices, GLuint* meshTextures, GLuint numtextures, GLint isTransparent)
+Mesh::Mesh(GLfloat* vertices, GLuint numvertices, GLuint* meshTextures, GLuint numtextures, GLint isTransparent) : verticesSize(numvertices)
 {
-	loadVertices(vertices, numvertices);
+	loadVertices(vertices);
 
 	for (GLuint i = 0; i < numtextures; i++)
 	{
@@ -24,7 +24,7 @@ Mesh::Mesh(GLfloat* vertices, GLuint numvertices, GLuint* meshTextures, GLuint n
 	}
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> meshTextures) : textures(meshTextures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> meshTextures) : verticesSize(vertices.size() * sizeof(Vertex)), textures(meshTextures)
 {
 	loadVertices(vertices, indices);
 }
@@ -37,15 +37,18 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &VAO);
 }
 
+GLuint Mesh::getVAO()
+{
+	return VAO;
+}
+
 /**
 	Loads vertices from a C++ float array (3 positions, 3 normals, 2 textrure coords)
 	into OpenGL Vertex Array Object, which can be used for later rendering (VAO)
 */
-void Mesh::loadVertices(GLfloat* vertices, GLuint sizeOfVertices)
+void Mesh::loadVertices(GLfloat* vertices)
 {
 	GLuint entriesPerVertex = 8;
-
-	verticesSize = sizeOfVertices;
 
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &VAO);
@@ -174,8 +177,6 @@ void Mesh::generateTangents(std::vector<glm::vec3>& tangents, std::vector<glm::v
 */
 void Mesh::loadVertices(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
 {
-	verticesSize = vertices.size() * sizeof(Vertex);
-
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -210,9 +211,52 @@ void Mesh::loadVertices(const std::vector<Vertex>& vertices, const std::vector<G
 	indexedMode = true;
 }
 
+/**
+	Using shaderProgram, and Vector Array Object, make a draw call for OpenGL to render all our vertices
+*/
+void Mesh::render(GLuint shaderprogram)
+{
+	setUpMaterial(shaderprogram);
+	///
+
+	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
+	glBindVertexArray(VAO);
+
+	if ( indexedMode )
+		glDrawElements(rMode, nRenderingElemts, GL_UNSIGNED_INT, 0);
+	else
+		glDrawArrays(rMode, 0, nRenderingElemts);
+
+	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
+	glBindVertexArray(0);
+}
+
+/**
+Using shaderProgram, and Vector Array Object, make OpenGL to render all our vertices, several times in one call
+*/
+void Mesh::batchRender(GLuint shederprogram, GLuint numCalls)
+{
+	setUpMaterial(shederprogram);
+	///
+	GLboolean dotMode = rendering::dotMode;
+
+	GLenum rMode = dotMode ? GL_POINTS : GL_TRIANGLES;
+	glBindVertexArray(VAO);
+
+	if (indexedMode)
+		glDrawElementsInstanced(rMode, nRenderingElemts, GL_UNSIGNED_INT, 0, numCalls);
+	else
+		glDrawArraysInstanced(rMode, 0, nRenderingElemts, numCalls);
+
+	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
+	glBindVertexArray(0);
+}
+
+/**
+*	Sets up all the material data in the sahder
+*/
 void Mesh::setUpMaterial(GLuint shaderprogram)
 {
-
 	GLboolean normalAvailable = false;
 	GLboolean parallaxAvailable = false;
 
@@ -249,48 +293,8 @@ void Mesh::setUpMaterial(GLuint shaderprogram)
 }
 
 /**
-	Using shaderProgram, and Vector Array Object, make a draw call for OpenGL to render all our vertices
-*/
-void Mesh::renderVAO(GLuint shaderprogram, GLuint VAO, GLuint numelements)
-{
-	setUpMaterial(shaderprogram);
-	///
-
-	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
-	glBindVertexArray(VAO);
-
-	if ( indexedMode )
-		glDrawElements(rMode, numelements, GL_UNSIGNED_INT, 0);
-	else
-		glDrawArrays(rMode, 0, numelements);
-
-	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
-	glBindVertexArray(0);
-}
-
-/**
-Using shaderProgram, and Vector Array Object, make OpenGL to render all our vertices, several times in one call
-*/
-void Mesh::batchRenderVAO(GLuint shederprogram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode)
-{
-	setUpMaterial(shederprogram);
-	///
-
-	GLenum rMode = dotMode ? GL_POINTS : GL_TRIANGLES;
-	glBindVertexArray(VAO);
-
-	if (indexedMode)
-		glDrawElementsInstanced(rMode, numelements, GL_UNSIGNED_INT, 0, numCalls);
-	else
-		glDrawArraysInstanced(rMode, 0, numelements, numCalls);
-
-	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
-	glBindVertexArray(0);
-}
-
-/**
-Set texture object for the uniform sampler2D variable in the fragment shader.
-textureId 0..31
+	Set texture object for the uniform sampler2D variable in the fragment shader.
+	textureId 0..31
 */
 void Mesh::setModelTexture(GLuint shaderProgram, GLuint texture, const GLchar* shaderVar, GLuint textureId)
 {
@@ -300,7 +304,7 @@ void Mesh::setModelTexture(GLuint shaderProgram, GLuint texture, const GLchar* s
 }
 
 /**
-Sets material properties for a current model to be rendered (set prior to rendering)
+	Sets material properties for a current model to be rendered (set prior to rendering)
 */
 void Mesh::setModelMaterial(GLuint shaderProgram, GLfloat shininess, GLint isTransparent)
 {

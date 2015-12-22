@@ -3,19 +3,17 @@
 /**
 	The case of colored 3d primitive (only array of 3 position coordinates)
 */
-RawPrimitive::RawPrimitive(GLfloat* vertices, GLuint verticesSize, glm::vec3 primitiveColor)
+RawPrimitive::RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices, const glm::vec3 primitiveColor) : verticesSize(sizeOfVertices), color(primitiveColor)
 {
-	VAO = loadRawVertices(vertices, verticesSize);
-
-	color = primitiveColor;
+	VAO = loadRawVertices(vertices);
 }
 
 /**
 	The case of textured 2d primitive (2 positions, 2 texture coordinates)
 */
-RawPrimitive::RawPrimitive(GLfloat* vertices, GLuint verticesSize)
+RawPrimitive::RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices) : verticesSize(sizeOfVertices)
 {
-	VAO = load2DTexturedVertices(vertices, verticesSize);
+	VAO = load2DTexturedVertices(vertices);
 }
 
 RawPrimitive::~RawPrimitive()
@@ -24,10 +22,9 @@ RawPrimitive::~RawPrimitive()
 	glDeleteVertexArrays(1, &VAO);
 }
 
-void RawPrimitive::setShaderColor(GLuint shaderProgram, const glm::vec3& primitiveColor)
+GLuint RawPrimitive::getVAO()
 {
-	//set color
-	glUniform3f(glGetUniformLocation(shaderProgram, "lsColor"), primitiveColor.x, primitiveColor.y, primitiveColor.z);
+	return VAO;
 }
 
 /**
@@ -35,11 +32,10 @@ void RawPrimitive::setShaderColor(GLuint shaderProgram, const glm::vec3& primiti
 	which can be used for later rendering, no texture coordinates, or vertex normals are used here,
 	just the raw positions
 */
-GLuint RawPrimitive::loadRawVertices(GLfloat* vertices, GLuint sizeOfVertices)
+GLuint RawPrimitive::loadRawVertices(GLfloat* vertices)
 {
 	GLuint entriesPerVertex = 3;
 
-	verticesSize = sizeOfVertices;
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	GLuint VAO;
@@ -70,11 +66,10 @@ GLuint RawPrimitive::loadRawVertices(GLfloat* vertices, GLuint sizeOfVertices)
 	which can be used for later rendering, no vertex normals are used here,
 	just the raw positions, texture coordinates
 */
-GLuint RawPrimitive::load2DTexturedVertices(GLfloat* vertices, GLuint sizeOfVertices)
+GLuint RawPrimitive::load2DTexturedVertices(GLfloat* vertices)
 {
 	GLuint entriesPerVertex = 4;
 
-	verticesSize = sizeOfVertices;
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	GLuint VAO;
@@ -102,10 +97,16 @@ GLuint RawPrimitive::load2DTexturedVertices(GLfloat* vertices, GLuint sizeOfVert
 	return VAO;
 }
 
+void RawPrimitive::setShaderColor(const GLuint shaderProgram, const glm::vec3& primitiveColor)
+{
+	//set color
+	glUniform3f(glGetUniformLocation(shaderProgram, "lsColor"), primitiveColor.x, primitiveColor.y, primitiveColor.z);
+}
+
 /**
 	Renders raw (no textures, or normals) primitive as a wireframe
 */
-void RawPrimitive::renderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements)
+void RawPrimitive::render(const GLuint shaderProgram)
 {
 	setShaderColor(shaderProgram, color);
 
@@ -115,7 +116,7 @@ void RawPrimitive::renderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelement
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, numelements);
+	glDrawArrays(GL_TRIANGLES, 0, nRenderingElemts);
 
 	//Return to previous rendering mode
 	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
@@ -123,7 +124,7 @@ void RawPrimitive::renderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelement
 	glBindVertexArray(0);
 }
 
-void RawPrimitive::batchRenderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode)
+void RawPrimitive::batchRender(const GLuint shaderProgram, const GLuint numCalls)
 {
 
 }

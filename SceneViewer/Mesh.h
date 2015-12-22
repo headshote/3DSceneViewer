@@ -1,6 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Renderable.h"
 #include "DataStructures.hpp"
@@ -14,20 +18,29 @@ public:
 
 	virtual ~Mesh();
 
+	virtual GLuint getVAO();
+
 protected:
+	virtual void render(GLuint shaderprogram);
+	virtual void batchRender(GLuint shaderProgram, GLuint numCalls);
+
+private:
+	GLuint VAO;
+	GLuint VBO;
+
+	GLuint nRenderingElemts;
+	GLuint verticesSize;
+
 	GLuint EBO = UINT_MAX;
 
 	bool indexedMode = false;
 
 	std::vector<Texture> textures;
 
-	virtual void renderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements);
-	virtual void batchRenderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode);
-
-private:
 	void generateTangents(std::vector<glm::vec3>& tangents, std::vector<glm::vec3>& bitangents, const glm::vec3& pos1, const glm::vec3& pos2, const glm::vec3& pos3,
 		const glm::vec2& uv1, const glm::vec2& uv2, const glm::vec2& uv3);
-	void loadVertices(GLfloat* vertices, GLuint sizeOfVertices);
+
+	void loadVertices(GLfloat* vertices);
 	void loadVertices(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 
 	void setUpMaterial(GLuint shaderprogram);

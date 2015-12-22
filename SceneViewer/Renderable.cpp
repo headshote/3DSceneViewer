@@ -1,10 +1,5 @@
 #include "Renderable.h"
 
-GLuint Renderable::getVAO()
-{
-	return VAO;
-}
-
 Renderable::Renderable()
 {
 }
@@ -12,12 +7,12 @@ Renderable::Renderable()
 /**
 Render things
 */
-void Renderable::drawCall(GLuint shederprogram)
+void Renderable::drawCall(const GLuint shederprogram)
 {
-	renderVAO(shederprogram, VAO, nRenderingElemts);
+	render(shederprogram);
 }
 
-void Renderable::drawBatch(GLuint shederprogram, GLuint numDrawCalls)
+void Renderable::drawBatch(const GLuint shederprogram, const GLuint numDrawCalls)
 {
-	batchRenderVAO(shederprogram, VAO, nRenderingElemts, numDrawCalls, rendering::dotMode);
+	batchRender(shederprogram, numDrawCalls);
 }

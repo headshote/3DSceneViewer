@@ -15,16 +15,21 @@ class Shader
 {
 public:
 	/**
+		Constructor reads and builds the shaders from files
+	*/
+	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath = nullptr);
+	~Shader();
+
+	/**
 		Returns the shader program id
 	*/
 	GLuint getProgramId();
 
-	/**
-		 Constructor reads and builds the shaders from files
-	*/	
-	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath = nullptr);
-	~Shader();
 private:
+	//no copy constructors and assignments
+	Shader(const Shader&);
+	Shader& operator=(const Shader&);
+
 	// The program ID
 	GLuint shaderProgram;
 

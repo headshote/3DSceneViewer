@@ -1171,38 +1171,38 @@ int main()
 	Model model1("models/nanosuit/nanosuit.obj");
 	model1.setScale(glm::vec3(0.33f, 0.33f, 0.33f));
 	models.push_back(model1);
-	GLuint grassTexture[] = { Model::loadTexture("textures/grass.png", true, false), Model::loadTexture("textures/mt_specular.png") };
+	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
 	Model model2(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)));
 	model2.setTranslation(glm::vec3(-1.5f, 0.0f, -0.48f));
 	models.push_back(model2);
-	GLuint glassTexture[] = { Model::loadTexture("textures/blending_transparent_window.png", false, false), Model::loadTexture("textures/mt_specular.png") };
+	GLuint glassTexture[] = { loadTexture("textures/blending_transparent_window.png", false, false), loadTexture("textures/mt_specular.png") };
 	Model model3(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0));
 	model3.setTranslation(glm::vec3(0.5f, 0.0f, -0.48f));
 	models.push_back(model3);
 	models.push_back(Model("models/rock/rock.obj"));
 	models.push_back(Model("models/planet/planet.obj"));
 	//5
-	GLuint metalTexture[] = { Model::loadTexture("textures/metal1.jpg", false, false), Model::loadTexture("textures/metal1_specular.png") };
+	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
 	models.push_back(Model(new Mesh(dataArrays::planeVertices, sizeof(dataArrays::planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint))));
 	//6
-	GLuint brickTexture[] = { Model::loadTexture("textures/brickwall.jpg", false, false), Model::loadTexture("textures/mt_specular.png"), Model::loadTexture("textures/brickwall_normal.jpg") };
+	GLuint brickTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png"), loadTexture("textures/brickwall_normal.jpg") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint))));
 	//7
-	GLuint brickPlainTexture[] = { Model::loadTexture("textures/brickwall.jpg", false, false), Model::loadTexture("textures/mt_specular.png") };
+	GLuint brickPlainTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint))));
 	//8
 	GLuint brickParallaxTexture[] = { 
-		Model::loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
-		Model::loadTexture("textures/parallax_brix/specular.png"),
-		Model::loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
-		Model::loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
+		loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
+		loadTexture("textures/parallax_brix/specular.png"),
+		loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
+		loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint))));
 	//9
 	GLuint tbParallaxTexture[] = {
-		Model::loadTexture("textures/woodbox/wood.png", false, false),
-		Model::loadTexture("textures/woodbox/specular.png"),
-		Model::loadTexture("textures/woodbox/toy_box_normal.png"),
-		Model::loadTexture("textures/woodbox/toy_box_disp.png") };
+		loadTexture("textures/woodbox/wood.png", false, false),
+		loadTexture("textures/woodbox/specular.png"),
+		loadTexture("textures/woodbox/toy_box_normal.png"),
+		loadTexture("textures/woodbox/toy_box_disp.png") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint))));
 
 	//Pre-cache transforms for a lot of model instances

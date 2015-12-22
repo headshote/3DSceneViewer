@@ -1,10 +1,5 @@
 #include "Shader.h"
 
-GLuint Shader::getProgramId()
-{
-	return shaderProgram;
-}
-
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath)
 {	
 	GLuint vertex;
@@ -50,6 +45,16 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLcha
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 	if (geometryAvailable)	glDeleteShader(geometry);
+}
+
+Shader::~Shader()
+{
+	glDeleteShader(shaderProgram);
+}
+
+GLuint Shader::getProgramId()
+{
+	return shaderProgram;
 }
 
 std::string* Shader::readFile(const GLchar* filePath)
@@ -101,8 +106,4 @@ GLuint Shader::compileShader(const GLchar** shaderSource, GLenum shaderType, con
 	}
 
 	return shader;
-}
-
-Shader::~Shader()
-{
 }

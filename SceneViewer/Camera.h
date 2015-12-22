@@ -12,22 +12,23 @@
 class Camera
 {
 public:
+	explicit Camera();
+	~Camera();
+
 	GLfloat getPitch();
 	GLfloat getYaw();
-	void setPitch(GLfloat value);
-	void setYaw(GLfloat value);
+	void setPitch(const GLfloat value);
+	void setYaw(const GLfloat value);
 
 	GLfloat fov;
 
-	Camera();
-	~Camera();
+	void step(const GLdouble time, const GLdouble deltaTime);
 
-	void step(GLdouble time, GLdouble deltaTime);
-
-	glm::mat4 getView(GLboolean forceUpdate = false);
+	glm::mat4 getView(const GLboolean forceUpdate = false);
 	glm::vec3 getPosition();
 	glm::vec3 getCameraDirection();
 protected:
+private:
 	glm::vec3 position;
 	glm::vec3 direction;
 	glm::vec3 worldUp;
@@ -40,7 +41,6 @@ protected:
 	GLfloat cameraSpeed;
 
 	void calculateDirection();
-private:
 	
 };
 

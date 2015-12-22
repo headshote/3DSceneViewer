@@ -10,26 +10,22 @@
 class Renderable
 {
 public:
-	GLuint getVAO();
-
 	virtual ~Renderable(){};
 
-	void drawCall(GLuint shederprogram);
+	virtual GLuint getVAO() = 0;
 
-	void drawBatch(GLuint shederprogram, GLuint numDrawCalls);
+	void drawCall(const GLuint shederprogram);
+
+	void drawBatch(const GLuint shederprogram, const GLuint numDrawCalls);
+
 protected:
 	Renderable();
 
-	GLuint VAO;
-	GLuint VBO;
+	virtual void render(const GLuint shaderprogram) = 0;
+	virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls) = 0;
 
-	GLuint nRenderingElemts;
-	GLuint verticesSize;
-
-	virtual void batchRenderVAO(GLuint shaderProgram, GLuint VAO, GLuint numelements, GLuint numCalls, GLboolean dotMode) = 0;
-	virtual void renderVAO(GLuint shaderprogram, GLuint VAO, GLuint numelements) = 0;
 private:
-
+	//no copy constructors and assignments
 	Renderable(const Renderable&);
 	Renderable& operator=(const Renderable&);
 };

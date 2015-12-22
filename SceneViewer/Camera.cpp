@@ -1,6 +1,28 @@
 #include "Camera.h"
 
-glm::mat4 Camera::getView(GLboolean forceUpdate)
+Camera::Camera()
+{
+	position = glm::vec3(0.0f, 0.0f, 3.0f);
+
+	direction = glm::vec3(0.0f, 0.0f, -1.0f);
+
+	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	view = glm::lookAt(position, position + direction, worldUp);
+
+	cameraSpeed = 3.0f;
+
+	fov = 50.0f;
+
+	pitch = 0.0f;
+	yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
+}
+
+Camera::~Camera()
+{
+}
+
+glm::mat4 Camera::getView(const GLboolean forceUpdate)
 {
 	if (forceUpdate)
 		view = glm::lookAt(position, position + direction, worldUp);
@@ -27,41 +49,19 @@ GLfloat Camera::getYaw()
 	return yaw;
 }
 
-void Camera::setPitch(GLfloat value)
+void Camera::setPitch(const GLfloat value)
 {
 	pitch = value;
 	calculateDirection();
 }
 
-void Camera::setYaw(GLfloat value)
+void Camera::setYaw(const GLfloat value)
 {
 	yaw = value;
 	calculateDirection();
 }
 
-Camera::Camera()
-{
-	position = glm::vec3(0.0f, 0.0f, 3.0f);
-
-	direction = glm::vec3(0.0f, 0.0f, -1.0f);
-
-	worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	view = glm::lookAt(position, position + direction, worldUp);
-
-	cameraSpeed = 3.0f;
-
-	fov = 50.0f;
-
-	pitch = 0.0f;
-	yaw = -90.0f;	// Yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right (due to how Eular angles work) so we initially rotate a bit to the left.
-}
-
-Camera::~Camera()
-{
-}
-
-void Camera::step(GLdouble time, GLdouble deltaTime)
+void Camera::step(const GLdouble time, const GLdouble deltaTime)
 {
 	//Fov change on mouse scrolls
 	if (fov >= 1.0f && fov <= 100.0f)

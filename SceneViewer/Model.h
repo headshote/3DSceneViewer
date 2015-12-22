@@ -12,36 +12,36 @@
 
 #include "Mesh.h"
 
+GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
+
 class Model
 {
 public:
-	Model(const GLchar* filePath, GLboolean useNormalMaps = false);
-	Model(Renderable* renderable);
+	explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
+	explicit Model(Renderable* renderable);
 	~Model();
 
-	static GLuint loadTexture(const GLchar* filePath, GLboolean isTransparent = false, GLboolean gammaCorrect = false);
-
-	void setTranslation(glm::vec3 translation);
-	void setScale(glm::vec3 scale);
-	void setRotation(glm::vec3 rotationAxis, GLfloat angle);
+	void setTranslation(const glm::vec3 translation);
+	void setScale(const glm::vec3 scale);
+	void setRotation(const glm::vec3 rotationAxis, const GLfloat angle);
 
 	glm::vec3 getTranslation();
 	glm::vec3 getScale();
 	glm::vec3 getRotationAxis();
 	GLfloat getRotationAngle();
 
-	void drawCall(GLuint shaderProgram);
-	void drawOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR = 0.43f, GLfloat outlineG = 0.28f, GLfloat outlineB = 0.06f);
+	void drawCall(const GLuint shaderProgram);
+	void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
 
 	void scheduleRendering();
 	void flushScheduledInstances();
 
-	void batchRenderScheduledInstances(GLuint shaderProgram);
-	void batchRenderOutlined(GLuint renderShader, GLuint outlineShader, GLfloat outlineR = 0.43f, GLfloat outlineG = 0.28f, GLfloat outlineB = 0.06f);
+	void batchRenderScheduledInstances(const GLuint shaderProgram);
+	void batchRenderOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
 
 	void translateBy(const glm::vec3& translation);
 	void scaleBy(const glm::vec3& scale);
-	void rotateBy(const glm::vec3& rotationAxis, GLfloat angle);
+	void rotateBy(const glm::vec3& rotationAxis, const GLfloat angle);
 protected:
 private:
 	std::vector<Texture> textures_loaded;
@@ -59,12 +59,12 @@ private:
 
 	glm::mat4 transformation;	//model transformation
 
-	void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value);
+	void setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value);
 
 	void initialize();
 	void updateTransformation();
 
-	void loadModel(const std::string& filePath, GLboolean useNormalMaps);
+	void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
 	void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
 	Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
