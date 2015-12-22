@@ -1,5 +1,7 @@
 #include "Mesh.h"
 
+using namespace renderables;
+
 Mesh::Mesh(GLfloat* vertices, GLuint numvertices, GLuint* meshTextures, GLuint numtextures, GLint isTransparent) : verticesSize(numvertices)
 {
 	loadVertices(vertices);

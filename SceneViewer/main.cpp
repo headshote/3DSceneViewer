@@ -27,6 +27,8 @@
 #include "Model.h"
 #include "RawPrimitive.h"
 
+using namespace renderables;
+
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;
 

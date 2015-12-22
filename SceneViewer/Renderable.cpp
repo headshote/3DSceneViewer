@@ -1,5 +1,7 @@
 #include "Renderable.h"
 
+using namespace renderables;
+
 Renderable::Renderable()
 {
 }

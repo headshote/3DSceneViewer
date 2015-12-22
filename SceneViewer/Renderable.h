@@ -7,26 +7,28 @@
 
 #include "rendering.h"
 
-class Renderable
+namespace renderables
 {
-public:
-	virtual ~Renderable(){};
+	class Renderable
+	{
+	public:
+		virtual ~Renderable(){};
 
-	virtual GLuint getVAO() = 0;
+		virtual GLuint getVAO() = 0;
 
-	void drawCall(const GLuint shederprogram);
+		void drawCall(const GLuint shederprogram);
 
-	void drawBatch(const GLuint shederprogram, const GLuint numDrawCalls);
+		void drawBatch(const GLuint shederprogram, const GLuint numDrawCalls);
 
-protected:
-	Renderable();
+	protected:
+		Renderable();
 
-	virtual void render(const GLuint shaderprogram) = 0;
-	virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls) = 0;
+		virtual void render(const GLuint shaderprogram) = 0;
+		virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls) = 0;
 
-private:
-	//no copy constructors and assignments
-	Renderable(const Renderable&);
-	Renderable& operator=(const Renderable&);
-};
-
+	private:
+		//no copy constructors and assignments
+		Renderable(const Renderable&);
+		Renderable& operator=(const Renderable&);
+	};
+}

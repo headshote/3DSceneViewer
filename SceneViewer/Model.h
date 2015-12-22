@@ -12,61 +12,63 @@
 
 #include "Mesh.h"
 
-GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
-
-class Model
+namespace renderables
 {
-public:
-	explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
-	explicit Model(Renderable* renderable);
-	~Model();
+	GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
 
-	void setTranslation(const glm::vec3 translation);
-	void setScale(const glm::vec3 scale);
-	void setRotation(const glm::vec3 rotationAxis, const GLfloat angle);
+	class Model
+	{
+	public:
+		explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
+		explicit Model(Renderable* renderable);
+		~Model();
 
-	glm::vec3 getTranslation();
-	glm::vec3 getScale();
-	glm::vec3 getRotationAxis();
-	GLfloat getRotationAngle();
+		void setTranslation(const glm::vec3 translation);
+		void setScale(const glm::vec3 scale);
+		void setRotation(const glm::vec3 rotationAxis, const GLfloat angle);
 
-	void drawCall(const GLuint shaderProgram);
-	void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
+		glm::vec3 getTranslation();
+		glm::vec3 getScale();
+		glm::vec3 getRotationAxis();
+		GLfloat getRotationAngle();
 
-	void scheduleRendering();
-	void flushScheduledInstances();
+		void drawCall(const GLuint shaderProgram);
+		void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
 
-	void batchRenderScheduledInstances(const GLuint shaderProgram);
-	void batchRenderOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
+		void scheduleRendering();
+		void flushScheduledInstances();
 
-	void translateBy(const glm::vec3& translation);
-	void scaleBy(const glm::vec3& scale);
-	void rotateBy(const glm::vec3& rotationAxis, const GLfloat angle);
-protected:
-private:
-	std::vector<Texture> textures_loaded;
+		void batchRenderScheduledInstances(const GLuint shaderProgram);
+		void batchRenderOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
 
-	std::vector<std::shared_ptr<Renderable>> meshes;
+		void translateBy(const glm::vec3& translation);
+		void scaleBy(const glm::vec3& scale);
+		void rotateBy(const glm::vec3& rotationAxis, const GLfloat angle);
+	protected:
+	private:
+		std::vector<Texture> textures_loaded;
 
-	glm::vec3 mTranslation;
-	glm::vec3 mScale;
-	glm::vec3 mRotationAxis;
-	GLfloat mRotation;
+		std::vector<std::shared_ptr<Renderable>> meshes;
 
-	//for batching a lot of instances of the same model, but with different model transforms into one call
-	GLuint instancedDataBufferId;	//here we'll store our model matrices for several instances, batched for rendering in OpenGL
-	std::vector<glm::mat4> batchedInstanceTransforms;
+		glm::vec3 mTranslation;
+		glm::vec3 mScale;
+		glm::vec3 mRotationAxis;
+		GLfloat mRotation;
 
-	glm::mat4 transformation;	//model transformation
+		//for batching a lot of instances of the same model, but with different model transforms into one call
+		GLuint instancedDataBufferId;	//here we'll store our model matrices for several instances, batched for rendering in OpenGL
+		std::vector<glm::mat4> batchedInstanceTransforms;
 
-	void setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value);
+		glm::mat4 transformation;	//model transformation
 
-	void initialize();
-	void updateTransformation();
+		void setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value);
 
-	void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
-	void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
-	Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
-	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
-};
+		void initialize();
+		void updateTransformation();
 
+		void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
+		void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
+		Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
+		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
+	};
+}

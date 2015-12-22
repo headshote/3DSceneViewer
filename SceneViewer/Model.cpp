@@ -1,5 +1,7 @@
 #include "Model.h"
 
+using namespace renderables;
+
 Model::Model(const GLchar* filePath, const GLboolean useNormalMaps)
 {
 	loadModel(filePath, useNormalMaps);
@@ -425,7 +427,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 /**
 	Load texture from file, a non-member function, that is packaged along with the Model class
 */
-GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent, const GLboolean gammaCorrect)
+GLuint renderables::loadTexture(const GLchar* filePath, const GLboolean isTransparent, const GLboolean gammaCorrect)
 {
 	int width, height;
 	unsigned char* image = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGBA);

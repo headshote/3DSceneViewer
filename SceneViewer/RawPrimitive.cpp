@@ -1,5 +1,7 @@
 #include "RawPrimitive.h"
 
+using namespace renderables;
+
 /**
 	The case of colored 3d primitive (only array of 3 position coordinates)
 */

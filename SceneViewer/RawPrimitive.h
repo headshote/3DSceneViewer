@@ -6,37 +6,39 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Renderable.h"
 
-class RawPrimitive : public Renderable
+namespace renderables
 {
-public:
-	RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices, const glm::vec3 primitiveColor);
-	RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices);
+	class RawPrimitive : public Renderable
+	{
+	public:
+		RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices, const glm::vec3 primitiveColor);
+		RawPrimitive(GLfloat* vertices, const GLuint sizeOfVertices);
 
-	virtual ~RawPrimitive();
+		virtual ~RawPrimitive();
 
-	virtual GLuint getVAO();
+		virtual GLuint getVAO();
 
-protected:
-	virtual void render(const GLuint shaderprogram);
-	virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls);
+	protected:
+		virtual void render(const GLuint shaderprogram);
+		virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls);
 
-private:
-	GLuint VAO;
-	GLuint VBO;
+	private:
+		GLuint VAO;
+		GLuint VBO;
 
-	GLuint nRenderingElemts;
-	GLuint verticesSize;
+		GLuint nRenderingElemts;
+		GLuint verticesSize;
 
-	//disabled copy constructor and assignment
-	RawPrimitive(const RawPrimitive&);
-	RawPrimitive& operator=(const RawPrimitive&);
+		//disabled copy constructor and assignment
+		RawPrimitive(const RawPrimitive&);
+		RawPrimitive& operator=(const RawPrimitive&);
 
-	glm::vec3 color;
+		glm::vec3 color;
 
-	void setShaderColor(const GLuint shaderProgram, const glm::vec3& primitiveColor);
+		void setShaderColor(const GLuint shaderProgram, const glm::vec3& primitiveColor);
 
-	GLuint loadRawVertices(GLfloat* vertices);
-	GLuint load2DTexturedVertices(GLfloat* vertices); 
+		GLuint loadRawVertices(GLfloat* vertices);
+		GLuint load2DTexturedVertices(GLfloat* vertices);
 
-};
-
+	};
+}
