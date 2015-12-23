@@ -2,8 +2,8 @@
 
 using namespace renderables;
 
-TextField::TextField(std::shared_ptr<::textandfonts::SVFont> font, const std::string& text, const GLuint viewPortWidth, const GLuint viewPortHeight) :
-		tfFont(font), tfText(text), scrWidth(viewPortWidth), scrHeight(viewPortHeight), pX(0.f), pY(0.f), textColor(glm::vec3(1.0f, 1.0f, 1.0f))
+TextField::TextField(std::shared_ptr<::textandfonts::SVFont> font, const std::string& text) :
+		tfFont(font), tfText(text), scrWidth(font->getScreenWidth()), scrHeight(font->getScreenHeight()), pX(0.f), pY(0.f), textColor(glm::vec3(1.0f, 1.0f, 1.0f))
 {
 
 }

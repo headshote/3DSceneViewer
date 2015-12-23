@@ -16,7 +16,7 @@ namespace renderables
 	class TextField : public Renderable
 	{
 	public:
-		TextField(std::shared_ptr<::textandfonts::SVFont> font, const std::string& text, const GLuint viewPortWidth, const GLuint viewPortHeight);
+		TextField(std::shared_ptr<::textandfonts::SVFont> font, const std::string& text);
 		~TextField();
 
 		virtual GLuint getVAO();

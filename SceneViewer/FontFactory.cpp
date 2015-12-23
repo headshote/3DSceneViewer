@@ -37,7 +37,7 @@ std::shared_ptr<SVFont> FontFactory::CreateFont(const GLchar* filePath, const GL
 
 std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(const std::string& text, std::shared_ptr<SVFont> font)
 {
-	return std::shared_ptr<renderables::TextField>(new renderables::TextField(font, text, font->getScreenWidth(), font->getScreenHeight()));
+	return std::shared_ptr<renderables::TextField>(new renderables::TextField(font, text));
 }
 
 /*static*/ std::shared_ptr<FontFactory> FontFactory::instance()
