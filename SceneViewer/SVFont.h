@@ -23,9 +23,9 @@ namespace textandfonts
 	{
 	public:
 		explicit SVFont(const GLuint VAO, const GLuint VBO);
-		explicit SVFont(const GLuint VAO, const GLuint VBO, const GLchar* filePath);
-		SVFont(const GLuint VAO, const GLuint VBO, const GLchar* filePath, const GLuint fontSize);
-		SVFont(const GLuint VAO, const GLuint VBO, const GLchar* filePath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight);
+		explicit SVFont(const GLuint VAO, const GLuint VBO, const std::string& filePath);
+		SVFont(const GLuint VAO, const GLuint VBO, const std::string& filePath, const GLuint fontSize);
+		SVFont(const GLuint VAO, const GLuint VBO, const std::string& filePath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight);
 		~SVFont();
 
 		Character getCharData(std::string::const_iterator character);
@@ -45,7 +45,7 @@ namespace textandfonts
 		const GLuint quadVAO;
 		const GLuint quadVBO;
 
-		void loadTTFont(const GLchar* filePath = "fonts/arial.ttf", const GLuint fontSize = 48);
+		void loadTTFont(const std::string& filePath = "fonts/arial.ttf", const GLuint fontSize = 48);
 	};
 }
 

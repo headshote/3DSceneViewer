@@ -30,14 +30,19 @@ void FontFactory::generateFontQuad()
 	quadVBO = fntVBO;
 }
 
-std::shared_ptr<SVFont> FontFactory::CreateFont(const GLchar* filePath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight)
+std::shared_ptr<SVFont> FontFactory::CreateFont(const std::string& filePath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight)
 {
 	return std::shared_ptr<SVFont> (new SVFont(quadVAO, quadVBO, filePath, fontSize, scrWidth, scrHeight));
 }
 
-std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(const std::string& text, std::shared_ptr<SVFont> font)
+std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(std::shared_ptr<SVFont> font, const std::string& text)
 {
 	return std::shared_ptr<renderables::TextField>(new renderables::TextField(font, text));
+}
+
+std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(const std::string& fontPath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight, const std::string& text)
+{
+	return std::shared_ptr<renderables::TextField>(new renderables::TextField(std::shared_ptr<SVFont>(new SVFont(quadVAO, quadVBO, fontPath, fontSize, scrWidth, scrHeight)), text));
 }
 
 /*static*/ std::shared_ptr<FontFactory> FontFactory::instance()

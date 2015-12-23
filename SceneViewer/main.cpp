@@ -1136,8 +1136,7 @@ int main()
 	}
 
 	//texts rendering
-	std::shared_ptr<SVFont> arialFont = FontFactory::instance()->CreateFont("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT);
-	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("I never asked fo this", arialFont);
+	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT, "I never asked fo this");
 
 	GLdouble lastFrame = 0.0f;  	// Time of last frame
 	//the game loop, that keeps on running until we tell GLFW to stop
