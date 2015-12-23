@@ -28,11 +28,4 @@ struct ShadowMap{
 	GLuint shadowmapTexture;
 };
 
-struct Character {
-	GLuint     textureId;  // ID handle of the glyph texture
-	glm::ivec2 size;       // Size of glyph
-	glm::ivec2 bearing;    // Offset from baseline to left/top of glyph
-	GLuint     advance;    // Offset to advance to next glyph
-};
-
-#endif	//DATA_STRUCTURES
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODEL
+#define MODEL
 
 #include <vector>
 #include <iostream>
@@ -72,3 +73,5 @@ namespace renderables
 		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
 	};
 }
+
+#endif

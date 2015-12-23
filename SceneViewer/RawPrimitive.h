@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAW_PRIMITIVE
+#define RAW_PRIMITIVE
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -42,3 +43,5 @@ namespace renderables
 
 	};
 }
+
+#endif

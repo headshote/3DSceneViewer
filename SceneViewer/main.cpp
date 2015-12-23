@@ -1,12 +1,14 @@
 #define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <map>
 #include <string>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <SOIL/SOIL.h>
 #include <assimp/Importer.hpp>
 
@@ -14,20 +16,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H  
-
 #include "rendering.h"
 #include "dataArrays.h"
 #include "DataStructures.hpp"
+
 #include "Shader.h"
 #include "Camera.h"
 #include "Inputs.h"
+
+#include "Renderable.h"
 #include "Mesh.h"
-#include "Model.h"
 #include "RawPrimitive.h"
+#include "TextField.h"
+#include "Model.h"
+
+#include "FontFactory.h"
+#include "SVFont.h"
 
 using namespace renderables;
+using namespace textandfonts;
 
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;
@@ -963,130 +970,6 @@ void renderGBufferData(GLuint deferredLghtShdr, GLuint* gBufferTextures, GLuint 
 	glEnable(GL_DEPTH_TEST);
 }
 
-void loadTTFont(std::map<GLchar, Character>& charMap, GLchar* filePath = "fonts/arial.ttf", GLuint fontSize = 48)
-{
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
-	FT_Face face;
-	if (FT_New_Face(ft, filePath, 0, &face))
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-	//The function sets the font's width and height parameters. 
-	//Setting the width to 0 lets the face dynamically calculate the width based on the given height. 
-	FT_Set_Pixel_Sizes(face, 0, fontSize);
-
-	//Pre-laod 128 chars to opengl textures
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
-	for (GLubyte c = 0; c < 128; c++)
-	{
-		// Load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			continue;
-		}
-		// Generate texture
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-			);
-		// Set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		// Now store character for later use
-		Character character = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
-		};
-		charMap.insert(std::pair<GLchar, Character>(c, character));
-	}
-	
-	//done, release resources
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
-}
-
-GLuint* generateFontQuad()
-{
-	GLuint VAO, VBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	GLuint* retV = new GLuint[2];
-	retV[0] = VAO;
-	retV[1] = VBO;
-	return retV;
-}
-
-void renderText(GLuint shader, GLuint quadVAO, GLuint quadVBO, std::map<GLchar, Character>& fontCharMap, const std::string& text, GLfloat x, GLfloat y, const glm::vec3& color)
-{
-	glm::mat4 projection = glm::ortho(0.0f, (GLfloat) SCREEN_WIDTH, 0.0f, (GLfloat) SCREEN_HEIGHT);
-
-	glUseProgram(shader);
-
-	glUniform3f(glGetUniformLocation(shader, "textColor"), color.x, color.y, color.z);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(quadVAO);
-
-	// Iterate through all characters
-	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++)
-	{
-		Character ch = fontCharMap[*c];
-
-		GLfloat xpos = x + ch.bearing.x;
-		GLfloat ypos = y - (ch.size.y - ch.bearing.y);
-
-		GLint w = ch.size.x;
-		GLint h = ch.size.y;
-		// Update VBO for each character
-		GLfloat vertices[24] = {
-			 xpos, ypos + h, 0.0, 0.0 ,
-			 xpos, ypos, 0.0, 1.0 ,
-			 xpos + w, ypos, 1.0, 1.0 ,
-
-			 xpos, ypos + h, 0.0, 0.0 ,
-			 xpos + w, ypos, 1.0, 1.0 ,
-			 xpos + w, ypos + h, 1.0, 0.0 
-		};
-		// Render glyph texture over quad
-		glBindTexture(GL_TEXTURE_2D, ch.textureId);
-		// Update content of VBO memory
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		// Render quad
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.advance >> 6); // divide by 64 using bitshift
-	}
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 int main()
 {
 	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1253,9 +1136,8 @@ int main()
 	}
 
 	//texts rendering
-	std::map<GLchar, Character> charMap;
-	loadTTFont(charMap, "fonts/arial.ttf", 32);
-	GLuint* textQuadVAOnVBO = generateFontQuad();
+	std::shared_ptr<SVFont> arialFont = FontFactory::instance()->CreateFont("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT);
+	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("I never asked fo this", arialFont);
 
 	GLdouble lastFrame = 0.0f;  	// Time of last frame
 	//the game loop, that keeps on running until we tell GLFW to stop
@@ -1364,8 +1246,9 @@ int main()
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
 				models, primitives, pointLightPositions, directionalLightDir);
 
-			renderText(textShader->getProgramId(), textQuadVAOnVBO[0], textQuadVAOnVBO[1], charMap,
-				"I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps", 20.0f, 680.0f, glm::vec3(1.0f));
+			textField1->setText("I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps");
+			textField1->setPosition(20.0f, 680.0f);
+			textField1->drawCall(textShader->getProgramId());
 
 			renderSkybox(skyBoxShader->getProgramId(), skyboxVAO, cubeTexture);
 
@@ -1406,8 +1289,9 @@ int main()
 
 			//just set, don't clear of course, because there is a scene, recreated from the G-buffer texture on top of the full-screen quad now
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			renderText(textShader->getProgramId(), textQuadVAOnVBO[0], textQuadVAOnVBO[1], charMap, 
-				"I never asked for this " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps", 20.0f, 680.0f, glm::vec3(1.0f));
+			textField1->setText("I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps");
+			textField1->setPosition(20.0f, 680.0f);
+			textField1->drawCall(textShader->getProgramId());
 
 			renderSkybox(skyBoxShader->getProgramId(), skyboxVAO, cubeTexture);
 		}

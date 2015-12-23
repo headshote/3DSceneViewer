@@ -1,11 +1,10 @@
-#pragma once
+#ifndef RENDERABLE
+#define RENDERABLE
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include "rendering.h"
 
 namespace renderables
 {
@@ -32,3 +31,5 @@ namespace renderables
 		Renderable& operator=(const Renderable&);
 	};
 }
+
+#endif

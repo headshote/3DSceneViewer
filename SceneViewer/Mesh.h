@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESH
+#define MESH
 
 #include <vector>
 #include <GL/glew.h>
@@ -23,8 +24,8 @@ namespace renderables
 		virtual GLuint getVAO();
 
 	protected:
-		virtual void render(GLuint shaderprogram);
-		virtual void batchRender(GLuint shaderProgram, GLuint numCalls);
+		virtual void render(const GLuint shaderprogram);
+		virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls);
 
 	private:
 		GLuint VAO;
@@ -53,3 +54,5 @@ namespace renderables
 		Mesh& operator=(const Mesh&);
 	};
 }
+
+#endif
