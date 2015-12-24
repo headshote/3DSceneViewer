@@ -34,6 +34,8 @@
 #include "FontFactory.h"
 #include "SVFont.h"
 
+#include "GlobalShaderVars.h"
+
 using namespace renderables;
 using namespace textandfonts;
 

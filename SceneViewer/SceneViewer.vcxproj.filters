@@ -41,6 +41,9 @@
     <ClCompile Include="SkyBox.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
+    <ClCompile Include="GlobalShaderVars.cpp">
+      <Filter>shadervars</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -81,6 +84,9 @@
     </ClInclude>
     <ClInclude Include="SkyBox.h">
       <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalShaderVars.h">
+      <Filter>shadervars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -223,6 +229,9 @@
     </Filter>
     <Filter Include="textandfonts">
       <UniqueIdentifier>{8dce4f63-d016-4d11-831b-54db4f7d30ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shadervars">
+      <UniqueIdentifier>{c28c4ae7-8933-42b1-b290-982a0984167c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
