@@ -677,7 +677,7 @@ void setShaderTransforms(GLuint shaderProgram, GLuint outlineShader, GLuint theN
 	//so we remove translation component from the view matrix
 	glUseProgram(skyboxShader);
 	setUniformMaxtrix(skyboxShader, "projection", projection);
-	setUniformMaxtrix(skyboxShader, "view", glm::mat4(glm::mat3(view)));
+	setUniformMaxtrix(skyboxShader, "pinnedView", glm::mat4(glm::mat3(view)));
 }
 
 /**
@@ -1127,19 +1127,11 @@ int main()
 		theCamera->step(currentTime, deltaTime);
 		glm::mat4 view = theCamera->getView();
 
-		//Lights
 		//Make some lights move around a bit				
 		pointLightPositions[0].x = -(GLfloat)sin(currentTime) + 0.5f;
 		pointLightPositions[0].y = -(GLfloat)cos(currentTime * 2) + 2.5f;
 		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;
 		
-		//for main shader (individual draw calls)
-		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
-			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
-		//for batch rendering shader
-		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
-			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
-
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glCullFace(GL_FRONT);
@@ -1164,6 +1156,14 @@ int main()
 			renderCalls(pointShadowMapShader->getProgramId(), pointShadowMapBatchShader->getProgramId(), outlineShader->getProgramId(),
 				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, pointLightPositions, directionalLightDir);
 		}		
+
+		//Lights
+		//for main shader (individual draw calls)
+		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
+			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
+		//for batch rendering shader
+		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
+			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 
 		//Set matrices and "global" textures for general rendering shaders
 		setShaderTransforms(mainShader, outlineShader->getProgramId(), theNormalsShader->getProgramId(),
