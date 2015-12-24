@@ -185,7 +185,7 @@ GLFWwindow* setUpWindow(int width, int height)
 	});
 
 	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode) {
-		std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;
+		//std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;
 		if (button == GLFW_MOUSE_BUTTON_1 || button == GLFW_MOUSE_BUTTON_3)
 		{
 			Inputs::mouseCapture = action == GLFW_PRESS;
@@ -592,14 +592,6 @@ void setLightingParameters(GLuint shader, GLfloat currentTime, glm::vec3& direct
 	spotLight(shader, spotLightColor, cameraPostion, cameraDirection, 1.0f, 0.09f, 0.032f);
 }
 
-void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value)
-{
-	GLint uniform = glGetUniformLocation(shaderProgram, uniformName);
-	glUniformMatrix4fv(uniform, 1,
-		GL_FALSE,	//transpose?
-		glm::value_ptr(value));
-}
-
 /**
 	Rendering models, reuse loaded models from hdd, just transform them and render whatever amount of times during the main loop iteration
 */
@@ -728,7 +720,9 @@ glm::mat4 setTransformationsForDirShadows(GLuint shadowMapShader, glm::vec3& lig
 	glm::mat4 lightSpaceMatrix = projection * view;
 
 	glUseProgram(shadowMapShader);
-	setUniformMaxtrix(shadowMapShader, "lightSpaceMatrix", lightSpaceMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "lightSpaceMatrix"), 1,
+		GL_FALSE,	//transpose?
+		glm::value_ptr(lightSpaceMatrix));
 
 	return lightSpaceMatrix;
 }
@@ -787,7 +781,9 @@ GLfloat setPointShadowTransforms(GLuint pointShadowMapShader, glm::vec3& lightPo
 
 	glUseProgram(pointShadowMapShader);
 	for (GLuint i = 0; i < lightSpaceMatrices.size(); i++)
-		setUniformMaxtrix(pointShadowMapShader, (GLchar*)("lightSpaceTransforms[" + std::to_string(i) + "]").c_str(), lightSpaceMatrices[i]);
+		glUniformMatrix4fv(glGetUniformLocation(pointShadowMapShader, (GLchar*)("lightSpaceTransforms[" + std::to_string(i) + "]").c_str()), 1,
+		GL_FALSE,	//transpose?
+		glm::value_ptr(lightSpaceMatrices[i]));
 	glUniform3f(glGetUniformLocation(pointShadowMapShader, "lightPosition"), lightPos.x, lightPos.y, lightPos.z);
 	glUniform1f(glGetUniformLocation(pointShadowMapShader, "far_plane"), far);
 
