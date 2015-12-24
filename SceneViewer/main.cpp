@@ -173,17 +173,15 @@ GLFWwindow* setUpWindow(int width, int height)
 	//register the function with the proper callback via GLFW
 	glfwSetKeyCallback(window, key_callback);
 
-	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos)
-	{
+	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
 		Inputs::onMouseMove((GLfloat)xpos, (GLfloat)ypos);
 	});
 
-	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset)
-	{
+	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
 		Inputs::onScroll(xoffset, yoffset);
 	});
 
-	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode){
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode) {
 		std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;
 		if (button == GLFW_MOUSE_BUTTON_1 || button == GLFW_MOUSE_BUTTON_3)
 		{
@@ -314,83 +312,6 @@ void clearFrameBuffer(GLuint FBO)
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value)
-{
-	GLint uniform = glGetUniformLocation(shaderProgram, uniformName);
-	glUniformMatrix4fv(uniform, 1, 
-		GL_FALSE,	//transpose?
-		glm::value_ptr(value));
-}
-
-/**
-	Lighting calculations for a directional (flobal light)
-*/
-void directionalLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightDirection)
-{
-	//
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-}
-
-/**
-	Set all the params for a spotlight (transfered to a fragment shader via uniform)
-*/
-void pointLight(GLuint shaderProgram, const glm::vec3& lightColor, glm::vec3& lightPosition, GLuint lightId, GLfloat kc, GLfloat kl, GLfloat kq)
-{
-	std::string iteration = std::to_string(lightId);
-	std::string uniformName = "pointLights[" + iteration + "]";
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".constant").c_str()), kc);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".linear").c_str()), kl);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".quadratic").c_str()), kq);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".ambient").c_str()), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".diffuse").c_str()), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".specular").c_str()), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".position").c_str()), lightPosition.x, lightPosition.y, lightPosition.z);
-
-	//calculate light volume
-	GLfloat lightMax = std::fmaxf(std::fmaxf(lightColor.r, lightColor.g), lightColor.b);
-	GLfloat radius = (-kl + std::sqrtf(kl * kl - 4 * kq * (kc - (256.0f / 5.0f) * lightMax))) / (2.0f * kq);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".radius").c_str()), radius);
-}
-
-/**
-Set all the params for a spotlight (transfered to a fragment shader via uniform)
-*/
-void spotLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightPosition, const glm::vec3& lightDirection, GLfloat kc, GLfloat kl, GLfloat kq)
-{
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.constant"), kc);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.linear"), kl);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.quadratic"), kq);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.position"), lightPosition.x, lightPosition.y, lightPosition.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.cutOff"), glm::cos(glm::radians(12.5f)));
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.outerCutOff"), glm::cos(glm::radians(17.5f))); 
-}
-
-void setLightingParameters(GLuint shader, GLfloat currentTime, glm::vec3& directionalLightColor, glm::vec3& directionalLightDir, glm::vec3& spotLightColor, glm::vec3& cameraDirection,
-	glm::vec3& cameraPostion, glm::vec3* pointLightPositions, glm::vec3* pointLightColors, GLuint numPointLights)
-{
-	glUseProgram(shader);
-
-	//
-	glUniform3f(glGetUniformLocation(shader, "viewerPos"), cameraPostion.x, cameraPostion.y, cameraPostion.z);
-
-	if (rendering::explodeMode)
-		glUniform1f(glGetUniformLocation(shader, "time"), currentTime);
-	directionalLight(shader, directionalLightColor, directionalLightDir);
-	GLuint i = 0;
-	for (; i < numPointLights; i++)
-		pointLight(shader, pointLightColors[i], pointLightPositions[i], i, 1.0f, 0.09f, 0.032f);
-	glUniform1i(glGetUniformLocation(shader, "activeLights"), i);	//don't calculate the lights we haven't initialized
-	spotLight(shader, spotLightColor, cameraPostion, cameraDirection, 1.0f, 0.09f, 0.032f);
 }
 
 /**
@@ -597,6 +518,83 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 	//retrun to whatever polygon mode we used on the actual rendering
 	glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	glEnable(GL_DEPTH_TEST);
+}
+
+/**
+Lighting calculations for a directional (flobal light)
+*/
+void directionalLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightDirection)
+{
+	//
+	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
+	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
+	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
+	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
+}
+
+/**
+Set all the params for a spotlight (transfered to a fragment shader via uniform)
+*/
+void pointLight(GLuint shaderProgram, const glm::vec3& lightColor, glm::vec3& lightPosition, GLuint lightId, GLfloat kc, GLfloat kl, GLfloat kq)
+{
+	std::string iteration = std::to_string(lightId);
+	std::string uniformName = "pointLights[" + iteration + "]";
+	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".constant").c_str()), kc);
+	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".linear").c_str()), kl);
+	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".quadratic").c_str()), kq);
+	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".ambient").c_str()), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
+	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".diffuse").c_str()), lightColor.x, lightColor.y, lightColor.z);
+	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".specular").c_str()), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
+	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".position").c_str()), lightPosition.x, lightPosition.y, lightPosition.z);
+
+	//calculate light volume
+	GLfloat lightMax = std::fmaxf(std::fmaxf(lightColor.r, lightColor.g), lightColor.b);
+	GLfloat radius = (-kl + std::sqrtf(kl * kl - 4 * kq * (kc - (256.0f / 5.0f) * lightMax))) / (2.0f * kq);
+	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".radius").c_str()), radius);
+}
+
+/**
+Set all the params for a spotlight (transfered to a fragment shader via uniform)
+*/
+void spotLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightPosition, const glm::vec3& lightDirection, GLfloat kc, GLfloat kl, GLfloat kq)
+{
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.constant"), kc);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.linear"), kl);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.quadratic"), kq);
+	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
+	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
+	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
+
+	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.position"), lightPosition.x, lightPosition.y, lightPosition.z);
+	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.cutOff"), glm::cos(glm::radians(12.5f)));
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.outerCutOff"), glm::cos(glm::radians(17.5f)));
+}
+
+void setLightingParameters(GLuint shader, GLfloat currentTime, glm::vec3& directionalLightColor, glm::vec3& directionalLightDir, glm::vec3& spotLightColor, glm::vec3& cameraDirection,
+	glm::vec3& cameraPostion, glm::vec3* pointLightPositions, glm::vec3* pointLightColors, GLuint numPointLights)
+{
+	glUseProgram(shader);
+
+	//
+	glUniform3f(glGetUniformLocation(shader, "viewerPos"), cameraPostion.x, cameraPostion.y, cameraPostion.z);
+
+	if (rendering::explodeMode)
+		glUniform1f(glGetUniformLocation(shader, "time"), currentTime);
+	directionalLight(shader, directionalLightColor, directionalLightDir);
+	GLuint i = 0;
+	for (; i < numPointLights; i++)
+		pointLight(shader, pointLightColors[i], pointLightPositions[i], i, 1.0f, 0.09f, 0.032f);
+	glUniform1i(glGetUniformLocation(shader, "activeLights"), i);	//don't calculate the lights we haven't initialized
+	spotLight(shader, spotLightColor, cameraPostion, cameraDirection, 1.0f, 0.09f, 0.032f);
+}
+
+void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat4& value)
+{
+	GLint uniform = glGetUniformLocation(shaderProgram, uniformName);
+	glUniformMatrix4fv(uniform, 1,
+		GL_FALSE,	//transpose?
+		glm::value_ptr(value));
 }
 
 void setShaderTransforms(GLuint shaderProgram, GLuint outlineShader, GLuint theNormalsShader, 
