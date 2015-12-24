@@ -45,11 +45,6 @@ const GLuint SHADOW_HEIGHT = 1536;
 
 const GLint NUM_FRAGMENT_SAMPLES = 4;
 
-//---State vars
-glm::vec3 spotLightColor(0.9f, 0.9f, 0.9f);
-
-GLuint screenShaderId = 0;
-
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	//std::cout << "key press key: " << key << " scancode : " << scancode << " action : " << action << " mode : " << mode << std::endl;
@@ -73,15 +68,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		//Flahslight on//off
 		if (key == GLFW_KEY_F)
 		{
-			GLfloat clorValue = spotLightColor.x == 0.0f ? 0.5f : 0.0f;
-			spotLightColor.x = clorValue;
-			spotLightColor.y = clorValue;
-			spotLightColor.z = clorValue;
+			GLfloat clorValue = rendering::spotLightColor.x == 0.0f ? 0.5f : 0.0f;
+			rendering::spotLightColor.x = clorValue;
+			rendering::spotLightColor.y = clorValue;
+			rendering::spotLightColor.z = clorValue;
 		}
 
 		//Switch between post-processing filters
 		if (key >= GLFW_KEY_1 &&  key <= GLFW_KEY_8)
-			screenShaderId = key - GLFW_KEY_1;
+			rendering::screenShaderId = key - GLFW_KEY_1;
 
 		if (key == GLFW_KEY_R)
 			rendering::rearView = !rendering::rearView;
@@ -1141,10 +1136,10 @@ int main()
 		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;
 		
 		//for main shader (individual draw calls)
-		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
 			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 		//for batch rendering shader
-		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
 			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
@@ -1207,7 +1202,7 @@ int main()
 			blitMSampledScene(multisampleFBO, sceneFBO);
 			blurSceneBrightnessTextr(gaussBlurShdr->getProgramId(), colorBufferTexture[1],
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat), pingpongFBOs, pingponTextures);
-			renderFrameBufferToQuad(screenShaders[screenShaderId]->getProgramId(), colorBufferTexture[0], pingponTextures[1],
+			renderFrameBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), colorBufferTexture[0], pingponTextures[1],
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));
 		}		
 		else	//---G-BUFFER STUFF, deferred rendering, no anti-aliosing for you, slut
@@ -1222,7 +1217,7 @@ int main()
 
 			//render gbuffuer data to fullscreen quad, perform lighting/shadow calculations per-pixel, basically, 
 			//instead of for all the fragments for all the vertices in the screen
-			setLightingParameters(theDeferredtingShader->getProgramId(), (GLfloat)currentTime, directionalLightColor, directionalLightDir, spotLightColor, theCamera->getCameraDirection(),
+			setLightingParameters(theDeferredtingShader->getProgramId(), (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
 				theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 			renderGBufferData(theDeferredtingShader->getProgramId(), gBufferTextures, sizeof(gBufferTextures) / sizeof(GLuint),
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));
@@ -1266,7 +1261,7 @@ int main()
 			blitMSampledScene(multisampleFBO, sceneFBO);
 			blurSceneBrightnessTextr(gaussBlurShdr->getProgramId(), colorBufferTexture[1], 
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat), pingpongFBOs, pingponTextures);
-			renderFrameBufferToQuad(screenShaders[screenShaderId]->getProgramId(), colorBufferTexture[0],  pingponTextures[1],
+			renderFrameBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), colorBufferTexture[0], pingponTextures[1],
 				renderingMiniQuad, sizeof(dataArrays::cornerQuadVertices) / sizeof(GLfloat));
 
 			//Reverse rear-view calculations (rear-view)

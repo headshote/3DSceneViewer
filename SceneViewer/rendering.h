@@ -2,6 +2,7 @@
 #define RENDERING_H
 
 #include <GL\glew.h>
+#include <glm\glm.hpp>
 
 namespace rendering
 {
@@ -21,6 +22,11 @@ namespace rendering
 	extern GLfloat hdrExposure;
 
 	extern GLboolean deferredMode;
+
+	extern glm::vec3 spotLightColor;
+
+	extern GLuint screenShaderId;
+
 }
 
 #endif	//RENDERING_H

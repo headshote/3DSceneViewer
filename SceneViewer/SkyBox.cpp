@@ -55,6 +55,7 @@ SkyBox::SkyBox(const std::vector<std::string>& textures_faces, GLboolean gammaco
 
 SkyBox::~SkyBox()
 {
+	glDeleteTextures(1, &cubemapID);
 	glDeleteBuffers(1, &skyboxVBO);
 	glDeleteVertexArrays(1, &skyboxVAO);
 }
