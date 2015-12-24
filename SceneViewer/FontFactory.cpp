@@ -12,6 +12,8 @@ FontFactory::FontFactory()
 
 FontFactory::~FontFactory()
 {
+	glDeleteBuffers(1, &quadVBO);
+	glDeleteVertexArrays(1, &quadVAO);
 }
 
 void FontFactory::generateFontQuad()

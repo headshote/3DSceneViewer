@@ -28,6 +28,7 @@ namespace renderables
 
 		GLuint cubemapID;	//cubemap texture id
 		GLuint skyboxVAO;
+		GLuint skyboxVBO;
 		GLuint nrenderingElements;
 
 		GLboolean useGammaCorrection;		

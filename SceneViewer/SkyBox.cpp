@@ -55,7 +55,8 @@ SkyBox::SkyBox(const std::vector<std::string>& textures_faces, GLboolean gammaco
 
 SkyBox::~SkyBox()
 {
-
+	glDeleteBuffers(1, &skyboxVBO);
+	glDeleteVertexArrays(1, &skyboxVAO);
 }
 
 
@@ -141,6 +142,7 @@ void SkyBox::generateCubeMapVAO(const std::vector<GLfloat>& skyboxVertices)
 	glBindVertexArray(0);
 
 	skyboxVAO =  VAO;
+	skyboxVBO = VBO;
 	nrenderingElements = skyboxVertices.size();
 }
 

@@ -146,16 +146,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	Inputs::keys[key] = action != GLFW_RELEASE;
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	Inputs::onMouseMove((GLfloat)xpos, (GLfloat)ypos);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	Inputs::onScroll(xoffset, yoffset);	
-}
-
 GLFWwindow* setUpWindow(int width, int height)
 {
 	//instantiate the GLFW window
@@ -187,8 +177,16 @@ GLFWwindow* setUpWindow(int width, int height)
 
 	//register the function with the proper callback via GLFW
 	glfwSetKeyCallback(window, key_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+
+	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos)
+	{
+		Inputs::onMouseMove((GLfloat)xpos, (GLfloat)ypos);
+	});
+
+	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset)
+	{
+		Inputs::onScroll(xoffset, yoffset);
+	});
 
 	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode){
 		std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;

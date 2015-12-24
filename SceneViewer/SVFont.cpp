@@ -27,6 +27,12 @@ SVFont::SVFont(const GLuint VAO, const GLuint VBO, const std::string& filePath, 
 
 SVFont::~SVFont()
 {
+	for (std::map<GLchar, Character>::const_iterator iter = charMap.cbegin(); iter != charMap.cend(); ++iter)
+	{
+		std::pair<GLchar, Character> characterPair = *iter;
+		Character character = characterPair.second;
+		glDeleteTextures(1, &character.textureId);
+	}
 }
 
 void SVFont::loadTTFont(const std::string& filePath, const GLuint fontSize)
