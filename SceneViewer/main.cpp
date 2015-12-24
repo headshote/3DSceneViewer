@@ -38,6 +38,7 @@
 
 using namespace renderables;
 using namespace textandfonts;
+using namespace shadervars;
 
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;
@@ -599,89 +600,6 @@ void setUniformMaxtrix(GLuint shaderProgram, GLchar* uniformName, const glm::mat
 		glm::value_ptr(value));
 }
 
-void setShaderTransforms(GLuint shaderProgram, GLuint outlineShader, GLuint theNormalsShader, 
-	GLuint batchSahder, GLuint batchNormalsShader, GLuint batchExplodeShader,
-	GLuint lightSourceShader, GLuint skyboxShader, const glm::mat4& projection, const glm::mat4& view, 
-	const glm::mat4& lightSpaceMatrix, GLuint shadowmapTexture, GLuint pointShadowmapTexture, GLfloat pLightFarPlane,
-	GLuint gBufferShader, GLuint gBufferBatchShader, GLuint deferredLightingShader, const glm::vec3 cameraPostion)
-{
-	glUseProgram(shaderProgram);
-	setUniformMaxtrix(shaderProgram, "projection", projection);
-	setUniformMaxtrix(shaderProgram, "view", view);
-	setUniformMaxtrix(shaderProgram, "lightSpaceMatrix", lightSpaceMatrix);
-	glActiveTexture(GL_TEXTURE16);
-	glBindTexture(GL_TEXTURE_2D, shadowmapTexture);
-	glUniform1i(glGetUniformLocation(shaderProgram, "shadowMap"), 16);
-	glActiveTexture(GL_TEXTURE17);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowmapTexture);
-	glUniform1i(glGetUniformLocation(shaderProgram, "pointShadowMap"), 17);
-	glUniform1f(glGetUniformLocation(shaderProgram, "pointLightFarPlane"), pLightFarPlane);
-	glUniform1i(glGetUniformLocation(shaderProgram, "pointLightShadows"), rendering::pointLightShadows);
-
-	glUseProgram(outlineShader);
-	setUniformMaxtrix(outlineShader, "projection", projection);
-	setUniformMaxtrix(outlineShader, "view", view);
-
-	glUseProgram(theNormalsShader);
-	setUniformMaxtrix(theNormalsShader, "projection", projection);
-	setUniformMaxtrix(theNormalsShader, "view", view);
-
-	glUseProgram(lightSourceShader);
-	setUniformMaxtrix(lightSourceShader, "projection", projection);
-	setUniformMaxtrix(lightSourceShader, "view", view);
-
-	glUseProgram(batchSahder);
-	setUniformMaxtrix(batchSahder, "projection", projection);
-	setUniformMaxtrix(batchSahder, "view", view);
-	setUniformMaxtrix(batchSahder, "lightSpaceMatrix", lightSpaceMatrix);
-	glActiveTexture(GL_TEXTURE16);
-	glBindTexture(GL_TEXTURE_2D, shadowmapTexture);
-	glUniform1i(glGetUniformLocation(batchSahder, "shadowMap"), 16);
-	glActiveTexture(GL_TEXTURE17);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowmapTexture);
-	glUniform1i(glGetUniformLocation(batchSahder, "pointShadowMap"), 17);
-	glUniform1f(glGetUniformLocation(batchSahder, "pointLightFarPlane"), pLightFarPlane);
-	glUniform1i(glGetUniformLocation(batchSahder, "pointLightShadows"), rendering::pointLightShadows);
-
-	glUseProgram(batchNormalsShader);
-	setUniformMaxtrix(batchNormalsShader, "projection", projection);
-	setUniformMaxtrix(batchNormalsShader, "view", view);
-
-	glUseProgram(batchExplodeShader);
-	setUniformMaxtrix(batchExplodeShader, "projection", projection);
-	setUniformMaxtrix(batchExplodeShader, "view", view);
-
-	glUseProgram(gBufferShader);
-	setUniformMaxtrix(gBufferShader, "projection", projection);
-	setUniformMaxtrix(gBufferShader, "view", view);
-	setUniformMaxtrix(gBufferShader, "lightSpaceMatrix", lightSpaceMatrix);
-	glUniform3f(glGetUniformLocation(gBufferShader, "viewerPos"), cameraPostion.x, cameraPostion.y, cameraPostion.z);
-
-
-	glUseProgram(gBufferBatchShader);
-	setUniformMaxtrix(gBufferBatchShader, "projection", projection);
-	setUniformMaxtrix(gBufferBatchShader, "view", view);
-	setUniformMaxtrix(gBufferBatchShader, "lightSpaceMatrix", lightSpaceMatrix);
-	glUniform3f(glGetUniformLocation(gBufferBatchShader, "viewerPos"), cameraPostion.x, cameraPostion.y, cameraPostion.z);
-
-
-	glUseProgram(deferredLightingShader);
-	glActiveTexture(GL_TEXTURE16);
-	glBindTexture(GL_TEXTURE_2D, shadowmapTexture);
-	glUniform1i(glGetUniformLocation(deferredLightingShader, "shadowMap"), 16);
-	glActiveTexture(GL_TEXTURE17);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, pointShadowmapTexture);
-	glUniform1i(glGetUniformLocation(deferredLightingShader, "pointShadowMap"), 17);
-	glUniform1f(glGetUniformLocation(deferredLightingShader, "pointLightFarPlane"), pLightFarPlane);
-	glUniform1i(glGetUniformLocation(deferredLightingShader, "pointLightShadows"), rendering::pointLightShadows);
-
-	//Cubemap shouldn't be translated with player's movement, shoud be in place,
-	//so we remove translation component from the view matrix
-	glUseProgram(skyboxShader);
-	setUniformMaxtrix(skyboxShader, "projection", projection);
-	setUniformMaxtrix(skyboxShader, "pinnedView", glm::mat4(glm::mat3(view)));
-}
-
 /**
 	Rendering models, reuse loaded models from hdd, just transform them and render whatever amount of times during the main loop iteration
 */
@@ -1080,6 +998,84 @@ int main()
 	//texts rendering
 	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT, "I never asked fo this");
 
+	//Shader vars, that are shared among many/most of the sahders are all registered here, and are updated for all the shaders in one call
+	GlobalShaderVars::instance()->addMat4Var("projection");
+	GlobalShaderVars::instance()->addMat4Var("view");
+	GlobalShaderVars::instance()->addMat4Var("lightSpaceMatrix");
+	GlobalShaderVars::instance()->addMat4Var("pinnedView");
+
+	GlobalShaderVars::instance()->addTextureVar("shadowMap");
+	GlobalShaderVars::instance()->addTextureVar("pointShadowMap");
+	GlobalShaderVars::instance()->addFloatVar("pointLightFarPlane");
+	GlobalShaderVars::instance()->addBoolVar("pointLightShadows");
+
+	GlobalShaderVars::instance()->addVec3Var("viewerPos");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "shadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointShadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightFarPlane");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightShadows");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "shadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointShadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointLightFarPlane");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointLightShadows");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(outlineShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(outlineShader->getProgramId(), "view");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theNormalsShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theNormalsShader->getProgramId(), "view");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(lightSourceShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(lightSourceShader->getProgramId(), "view");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "shadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointShadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointLightFarPlane");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointLightShadows");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "shadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "pointShadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "pointLightFarPlane");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "pointLightShadows");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBatchNormalsShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBatchNormalsShader->getProgramId(), "view");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(outlineBatchShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(outlineBatchShader->getProgramId(), "view");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffShader->getProgramId(), "viewerPos");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffBatchShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffBatchShader->getProgramId(), "view");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffBatchShader->getProgramId(), "lightSpaceMatrix");
+	GlobalShaderVars::instance()->subscribeShaderToVar(thegBuffBatchShader->getProgramId(), "viewerPos");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "shadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointShadowMap");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightFarPlane");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightShadows");
+
+	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "projection");
+	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "pinnedView");
+
 	GLdouble lastFrame = 0.0f;  	// Time of last frame
 	//the game loop, that keeps on running until we tell GLFW to stop
 	while (!glfwWindowShouldClose(window))
@@ -1167,12 +1163,17 @@ int main()
 		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
 			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
 
-		//Set matrices and "global" textures for general rendering shaders
-		setShaderTransforms(mainShader, outlineShader->getProgramId(), theNormalsShader->getProgramId(),
-			mainBatchShader, theBatchNormalsShader->getProgramId(), outlineBatchShader->getProgramId(),
-			lightSourceShader->getProgramId(), skyBoxShader->getProgramId(), projection, view,
-			lightSpaceMatrix, directionalShadowmap.shadowmapTexture, pointShadowmap.shadowmapTexture, pointLightFPlane, 
-			thegBuffShader->getProgramId(), thegBuffBatchShader->getProgramId(), theDeferredtingShader->getProgramId(), theCamera->getPosition());
+		GlobalShaderVars::instance()->setMat4Var("projection", projection);
+		GlobalShaderVars::instance()->setMat4Var("view", view);
+		GlobalShaderVars::instance()->setMat4Var("pinnedView", glm::mat4(glm::mat3(view)));
+		GlobalShaderVars::instance()->setMat4Var("lightSpaceMatrix", lightSpaceMatrix);
+		GlobalShaderVars::instance()->setTextureVar("shadowMap", 16, GL_TEXTURE_2D, directionalShadowmap.shadowmapTexture);
+		GlobalShaderVars::instance()->setTextureVar("pointShadowMap", 17, GL_TEXTURE_CUBE_MAP, pointShadowmap.shadowmapTexture);
+		GlobalShaderVars::instance()->setFloatVar("pointLightFarPlane", pointLightFPlane);
+		GlobalShaderVars::instance()->setBoolVar("pointLightShadows", rendering::pointLightShadows);
+		GlobalShaderVars::instance()->setVec3Var("viewerPos", theCamera->getPosition());
+
+		GlobalShaderVars::instance()->updateAllVars();
 
 		//Render the scene to the frame buffer texture (normal rendering with lighting)
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -1245,11 +1246,10 @@ int main()
 			theCamera->setYaw(theCamera->getYaw() + 360.0f);
 			view = theCamera->getView(true);
 
-			setShaderTransforms(mainShader, outlineShader->getProgramId(), theNormalsShader->getProgramId(),
-				mainBatchShader, theBatchNormalsShader->getProgramId(), outlineBatchShader->getProgramId(),
-				lightSourceShader->getProgramId(), skyBoxShader->getProgramId(), projection, view, 
-				lightSpaceMatrix, directionalShadowmap.shadowmapTexture, pointShadowmap.shadowmapTexture, pointLightFPlane,
-				thegBuffShader->getProgramId(), outlineShader->getProgramId(), theDeferredtingShader->getProgramId(), theCamera->getPosition());
+			GlobalShaderVars::instance()->setMat4Var("view", view);
+			GlobalShaderVars::instance()->setMat4Var("pinnedView", glm::mat4(glm::mat3(view)));
+
+			GlobalShaderVars::instance()->updateAllVars();
 
 			clearFrameBuffer(multisampleFBO);
 
