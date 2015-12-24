@@ -28,6 +28,7 @@
 #include "Mesh.h"
 #include "RawPrimitive.h"
 #include "TextField.h"
+#include "SkyBox.h"
 #include "Model.h"
 
 #include "FontFactory.h"
@@ -771,55 +772,6 @@ void renderCalls(GLuint shaderProgram, GLuint batchShaderProgram, GLuint outline
 	primitives[0].drawCall(lightSourceShader);
 }
 
-GLuint createCubeMap(const std::vector<GLchar*>& textures_faces, GLboolean gammacorrection = false)
-{
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	//Set texture for each face of a cubemap
-	int width, height;
-	unsigned char* image;
-	for (GLuint i = 0; i < textures_faces.size(); i++)
-	{
-		image = SOIL_load_image(textures_faces[i], &width, &height, 0, SOIL_LOAD_RGB);
-		glTexImage2D(
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-			0, 
-			gammacorrection ? GL_SRGB : GL_RGB,
-			width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image
-		);
-	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	return textureID;
-}
-
-void activateSkyboxTexture(GLuint cubemapTexture)
-{
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-}
-
-void renderSkybox(GLuint skyboxShader, GLuint skyboxVAO, GLuint cubemapTexture)
-{
-	glUseProgram(skyboxShader);
-	glDepthMask(GL_FALSE);
-
-	glBindVertexArray(skyboxVAO);
-	activateSkyboxTexture(cubemapTexture);
-	glDrawArrays(GL_TRIANGLES, 0, sizeof(dataArrays::skyboxVertices));
-	glBindVertexArray(0);
-	glDepthMask(GL_TRUE);
-}
-
 ShadowMap generateDirShadowRBuffer()
 {
 	//frame buffer
@@ -1094,12 +1046,9 @@ int main()
 	prepareModels(models);
 
 	//Cube map
-	GLuint cubeTexture = createCubeMap(std::vector<GLchar*> {"textures/cubemap/mnight_rt.jpg", 
+	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg", 
 		"textures/cubemap/mnight_lf.jpg", "textures/cubemap/mnight_up.jpg", "textures/cubemap/mnight_dn.jpg", 
 		"textures/cubemap/mnight_bk.jpg", "textures/cubemap/mnight_ft.jpg" });
-	//when we pass vec3 to RawPrimitive constructor, it loads vertices as if 3d positions for a primitive, that is supposed to be rendered in one color
-	RawPrimitive sb(dataArrays::skyboxVertices, sizeof(dataArrays::skyboxVertices), glm::vec3());
-	GLuint skyboxVAO = sb.getVAO();
 
 	//create frame buffer to render the shadow map
 	ShadowMap directionalShadowmap = generateDirShadowRBuffer();
@@ -1249,7 +1198,7 @@ int main()
 			textField1->setPosition(20.0f, 680.0f);
 			textField1->drawCall(textShader->getProgramId());
 
-			renderSkybox(skyBoxShader->getProgramId(), skyboxVAO, cubeTexture);
+			skyBox.drawCall(skyBoxShader->getProgramId());
 
 			if (rendering::renderNormals)
 				renderCalls(theNormalsShader->getProgramId(), theBatchNormalsShader->getProgramId(),
@@ -1292,7 +1241,7 @@ int main()
 			textField1->setPosition(20.0f, 680.0f);
 			textField1->drawCall(textShader->getProgramId());
 
-			renderSkybox(skyBoxShader->getProgramId(), skyboxVAO, cubeTexture);
+			skyBox.drawCall(skyBoxShader->getProgramId());
 		}
 		//---END OF G-BUFFER STUFF
 
@@ -1314,7 +1263,7 @@ int main()
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
 				models, primitives, pointLightPositions, directionalLightDir);
 
-			renderSkybox(skyBoxShader->getProgramId(), skyboxVAO, cubeTexture);
+			skyBox.drawCall(skyBoxShader->getProgramId());
 
 			blitMSampledScene(multisampleFBO, sceneFBO);
 			blurSceneBrightnessTextr(gaussBlurShdr->getProgramId(), colorBufferTexture[1], 
