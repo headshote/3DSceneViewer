@@ -38,8 +38,10 @@ namespace lighting
 		void setCameraPosition(const glm::vec3& pos);
 		void setCameraDirection(const glm::vec3& dir);
 
-		void setSpotLightColor(const glm::vec3& color);
 		void setDirLightColor(const glm::vec3& color);
+		void setSpotLightColor(const glm::vec3& color);
+
+		void setPointightPosition(const GLuint id, const glm::vec3& position);
 
 		DirectionalLight getDirLight();
 		PointLight getPointLight(GLuint id);

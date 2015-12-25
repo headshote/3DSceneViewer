@@ -1014,23 +1014,21 @@ int main()
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
 		//Inputs
-		/*if (Inputs::keys[GLFW_KEY_MINUS])
+		if (Inputs::keys[GLFW_KEY_MINUS])
 		{
+			const glm::vec3& directionalLightColor = lights.getDirLight().color;
 			if (directionalLightColor.x > 0)
-				directionalLightColor -= 0.01f;
+				lights.setDirLightColor(glm::vec3(directionalLightColor - 0.01f));
 			else
-			{
-				directionalLightColor.x = 0.0f;
-				directionalLightColor.y = 0.0f;
-				directionalLightColor.z= 0.0f;
-			}
+				lights.setDirLightColor(glm::vec3(0.0f));
 		}
 
 		if (Inputs::keys[GLFW_KEY_EQUAL])
 		{
+			const glm::vec3& directionalLightColor = lights.getDirLight().color;
 			if (directionalLightColor.x < 1)
-				directionalLightColor += 0.01f;
-		}*/
+				lights.setDirLightColor(glm::vec3(directionalLightColor + 0.01f));
+		}
 
 		// Check and call events
 		glfwPollEvents();
@@ -1044,10 +1042,9 @@ int main()
 		theCamera->step(currentTime, deltaTime);
 		glm::mat4 view = theCamera->getView();
 
-		//Make some lights move around a bit				
-		/*pointLightPositions[0].x = -(GLfloat)sin(currentTime) + 0.5f;
-		pointLightPositions[0].y = -(GLfloat)cos(currentTime * 2) + 2.5f;
-		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;*/
+		//Make some lights move around a bit		
+		lights.setPointightPosition(0, glm::vec3(-(GLfloat)sin(currentTime) + 0.5f, -(GLfloat)cos(currentTime * 2) + 2.5f, 2.0f));
+		lights.setPointightPosition(1, glm::vec3(-(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f, 0.2f, 0.5f));
 		
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);

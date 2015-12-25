@@ -89,6 +89,11 @@ void LightingSystem::setLightingParameters(const GLuint shader)
 	setSpotLight(shader);
 }
 
+void LightingSystem::setPointightPosition(const GLuint id, const glm::vec3& position)
+{
+	pointLights[id].position = position;
+}
+
 /**
 Lighting calculations for a directional (flobal light)
 */
