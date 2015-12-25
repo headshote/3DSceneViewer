@@ -19,6 +19,7 @@ public:
 	static GLdouble yScroll;
 
 	static GLboolean keys[1024];
+	static GLboolean justReleasedKeys[1024];
 
 	static void onScroll(GLdouble xoffset, GLdouble yoffse);
 	static void step(GLdouble timeStamp, GLdouble timeDelta);

@@ -1,6 +1,7 @@
 #include "Inputs.h"
 
 /*static*/ GLboolean Inputs::keys[1024];
+/*static*/ GLboolean Inputs::justReleasedKeys[1024];
 
 /*static*/ GLfloat Inputs::lastX = 0;
 /*static*/ GLfloat Inputs::lastY = 0;
@@ -36,6 +37,9 @@ Inputs::~Inputs()
 	Inputs::yScroll = 0.0f;
 	Inputs::xoffset = 0.0f;
 	Inputs::yoffset = 0.0f;
+
+	for (GLuint i = 0; i < 1024; ++i)
+		Inputs::justReleasedKeys[i] = false;
 }
 
 /*static*/ void Inputs::onMouseMove(GLfloat xpos, GLfloat ypos)

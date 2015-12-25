@@ -58,6 +58,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	//A one-time event, upon releasing a key (so that it won't be done repetedly, while key is held)
 	if (action == GLFW_RELEASE)
 	{
+		Inputs::justReleasedKeys[key] = true;
+
 		//Close window
 		if (key == GLFW_KEY_ESCAPE)
 			glfwSetWindowShouldClose(window, GL_TRUE);
@@ -70,15 +72,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 			glPolygonMode(GL_FRONT_AND_BACK, polygonMode == GL_FILL ? GL_LINE : GL_FILL);			
 		}
-
-		//Flahslight on//off
-		/*if (key == GLFW_KEY_F)
-		{
-			GLfloat clorValue = rendering::spotLightColor.x == 0.0f ? 0.5f : 0.0f;
-			rendering::spotLightColor.x = clorValue;
-			rendering::spotLightColor.y = clorValue;
-			rendering::spotLightColor.z = clorValue;
-		}*/
 
 		//Switch between post-processing filters
 		if (key >= GLFW_KEY_1 &&  key <= GLFW_KEY_8)
@@ -1004,6 +997,9 @@ int main()
 		GLdouble deltaTime = currentTime - lastFrame;	// Time between current frame and last frame
 		lastFrame = currentTime;
 
+		// Check and call glfw window events
+		glfwPollEvents();
+
 		//Main model rendering shader
 		GLuint mainShader;
 		mainShader = rendering::explodeMode ? theBlinnExplodeShader->getProgramId() : theBlinnShader->getProgramId();
@@ -1030,8 +1026,11 @@ int main()
 				lights.setDirLightColor(glm::vec3(directionalLightColor + 0.01f));
 		}
 
-		// Check and call events
-		glfwPollEvents();
+		if (Inputs::justReleasedKeys[GLFW_KEY_F])
+		{
+			GLfloat clorValue = lights.getSpotLight().color.x == 0.0f ? 0.5f : 0.0f;
+			lights.setSpotLightColor(glm::vec3(clorValue));
+		}
 
 		clearScreen();
 
