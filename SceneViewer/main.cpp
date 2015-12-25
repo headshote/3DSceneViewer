@@ -243,54 +243,6 @@ void printInfo()
 	std::cout << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
 }
 
-void prepareModels(std::vector<Model>& models)
-{
-	Model& model = models[0];
-
-	for (GLuint i = 0; i < 25; i++)
-	{
-		model.setTranslation(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	for (GLuint i = 0; i < 45; i++)
-	{
-		model.setTranslation(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	for (GLuint i = 0; i < 70; i++)
-	{
-		model.setTranslation(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	model.flushScheduledInstances();
-
-	Model& rock = models[3]; 
-	for (GLuint i = 0; i < 25; i++)
-	{
-		rock.setTranslation(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
-		rock.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f + 45.0f * i);
-		rock.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
-		rock.scheduleRendering();
-	}
-	rock.flushScheduledInstances();
-
-	Model& planet = models[4]; 
-	for (GLuint i = 0; i < 5; i++)
-	{
-		planet.setTranslation(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
-		planet.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		planet.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
-		planet.scheduleRendering();
-	}
-	planet.flushScheduledInstances();
-}
-
 /**
 	Makes the default FBO currently active, and clears it
 */
@@ -517,6 +469,54 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 	//retrun to whatever polygon mode we used on the actual rendering
 	glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
 	glEnable(GL_DEPTH_TEST);
+}
+
+void prepareModels(std::vector<Model>& models)
+{
+	Model& model = models[0];
+
+	for (GLuint i = 0; i < 25; i++)
+	{
+		model.setTranslation(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
+		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
+		model.scheduleRendering();
+	}
+
+	for (GLuint i = 0; i < 45; i++)
+	{
+		model.setTranslation(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
+		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
+		model.scheduleRendering();
+	}
+
+	for (GLuint i = 0; i < 70; i++)
+	{
+		model.setTranslation(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
+		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
+		model.scheduleRendering();
+	}
+
+	model.flushScheduledInstances();
+
+	Model& rock = models[3];
+	for (GLuint i = 0; i < 25; i++)
+	{
+		rock.setTranslation(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
+		rock.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f + 45.0f * i);
+		rock.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
+		rock.scheduleRendering();
+	}
+	rock.flushScheduledInstances();
+
+	Model& planet = models[4];
+	for (GLuint i = 0; i < 5; i++)
+	{
+		planet.setTranslation(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
+		planet.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
+		planet.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
+		planet.scheduleRendering();
+	}
+	planet.flushScheduledInstances();
 }
 
 /**
@@ -1001,11 +1001,9 @@ int main()
 		glfwPollEvents();
 
 		//Main model rendering shader
-		GLuint mainShader;
-		mainShader = rendering::explodeMode ? theBlinnExplodeShader->getProgramId() : theBlinnShader->getProgramId();
+		GLuint mainShader = rendering::explodeMode ? theBlinnExplodeShader->getProgramId() : theBlinnShader->getProgramId();
 
-		GLuint mainBatchShader;
-		mainBatchShader = rendering::explodeMode ? theBlinnBatchExplodeShader->getProgramId() : theBlinnBatchShader->getProgramId();
+		GLuint mainBatchShader = rendering::explodeMode ? theBlinnBatchExplodeShader->getProgramId() : theBlinnBatchShader->getProgramId();
 
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
