@@ -36,9 +36,12 @@
 
 #include "GlobalShaderVars.h"
 
+#include "LightingSystem.h"
+
 using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;
+using namespace lighting;
 
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;
@@ -69,13 +72,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		}
 
 		//Flahslight on//off
-		if (key == GLFW_KEY_F)
+		/*if (key == GLFW_KEY_F)
 		{
 			GLfloat clorValue = rendering::spotLightColor.x == 0.0f ? 0.5f : 0.0f;
 			rendering::spotLightColor.x = clorValue;
 			rendering::spotLightColor.y = clorValue;
 			rendering::spotLightColor.z = clorValue;
-		}
+		}*/
 
 		//Switch between post-processing filters
 		if (key >= GLFW_KEY_1 &&  key <= GLFW_KEY_8)
@@ -524,79 +527,10 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 }
 
 /**
-Lighting calculations for a directional (flobal light)
-*/
-void directionalLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightDirection)
-{
-	//
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-}
-
-/**
-Set all the params for a spotlight (transfered to a fragment shader via uniform)
-*/
-void pointLight(GLuint shaderProgram, const glm::vec3& lightColor, glm::vec3& lightPosition, GLuint lightId, GLfloat kc, GLfloat kl, GLfloat kq)
-{
-	std::string iteration = std::to_string(lightId);
-	std::string uniformName = "pointLights[" + iteration + "]";
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".constant").c_str()), kc);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".linear").c_str()), kl);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".quadratic").c_str()), kq);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".ambient").c_str()), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".diffuse").c_str()), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".specular").c_str()), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, (uniformName + ".position").c_str()), lightPosition.x, lightPosition.y, lightPosition.z);
-
-	//calculate light volume
-	GLfloat lightMax = std::fmaxf(std::fmaxf(lightColor.r, lightColor.g), lightColor.b);
-	GLfloat radius = (-kl + std::sqrtf(kl * kl - 4 * kq * (kc - (256.0f / 5.0f) * lightMax))) / (2.0f * kq);
-	glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".radius").c_str()), radius);
-}
-
-/**
-Set all the params for a spotlight (transfered to a fragment shader via uniform)
-*/
-void spotLight(GLuint shaderProgram, const glm::vec3& lightColor, const glm::vec3& lightPosition, const glm::vec3& lightDirection, GLfloat kc, GLfloat kl, GLfloat kq)
-{
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.constant"), kc);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.linear"), kl);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.quadratic"), kq);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.ambient"), lightColor.x * 0.2f, lightColor.y * 0.2f, lightColor.z * 0.2f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.diffuse"), lightColor.x, lightColor.y, lightColor.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.specular"), lightColor.x * 2.0f, lightColor.y * 2.0f, lightColor.z * 2.0f);
-
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.position"), lightPosition.x, lightPosition.y, lightPosition.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "spotlight.direction"), lightDirection.x, lightDirection.y, lightDirection.z);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.cutOff"), glm::cos(glm::radians(12.5f)));
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.outerCutOff"), glm::cos(glm::radians(17.5f)));
-}
-
-void setLightingParameters(GLuint shader, GLfloat currentTime, glm::vec3& directionalLightColor, glm::vec3& directionalLightDir, glm::vec3& spotLightColor, glm::vec3& cameraDirection,
-	glm::vec3& cameraPostion, glm::vec3* pointLightPositions, glm::vec3* pointLightColors, GLuint numPointLights)
-{
-	glUseProgram(shader);
-
-	//
-	glUniform3f(glGetUniformLocation(shader, "viewerPos"), cameraPostion.x, cameraPostion.y, cameraPostion.z);
-
-	if (rendering::explodeMode)
-		glUniform1f(glGetUniformLocation(shader, "time"), currentTime);
-	directionalLight(shader, directionalLightColor, directionalLightDir);
-	GLuint i = 0;
-	for (; i < numPointLights; i++)
-		pointLight(shader, pointLightColors[i], pointLightPositions[i], i, 1.0f, 0.09f, 0.032f);
-	glUniform1i(glGetUniformLocation(shader, "activeLights"), i);	//don't calculate the lights we haven't initialized
-	spotLight(shader, spotLightColor, cameraPostion, cameraDirection, 1.0f, 0.09f, 0.032f);
-}
-
-/**
 	Rendering models, reuse loaded models from hdd, just transform them and render whatever amount of times during the main loop iteration
 */
 void renderCalls(GLuint shaderProgram, GLuint batchShaderProgram, GLuint outlineShader, GLuint outlineBatchShader, GLuint lightSourceShader, std::vector<Model>& models,
-	std::vector<Model>& primitives, const glm::vec3* pointLightPositions, const glm::vec3& directionalLightDir)
+	std::vector<Model>& primitives, LightingSystem& lights)
 {
 	glEnable(GL_CULL_FACE);	//3d meshes, backface cull
 	glUseProgram(batchShaderProgram);
@@ -668,10 +602,10 @@ void renderCalls(GLuint shaderProgram, GLuint batchShaderProgram, GLuint outline
 	GLuint i = 0;
 	for ( auto iterator = primitives.begin(); iterator != primitives.end(); i++, iterator++)
 	{
-		iterator->setTranslation(pointLightPositions[i]);
+		iterator->setTranslation(lights.getPointLight(i).position);
 		iterator->drawCall(lightSourceShader);
 	}
-	primitives[0].setTranslation(directionalLightDir * (-26.0f));
+	primitives[0].setTranslation(lights.getDirLight().direction * (-26.0f));
 	primitives[0].drawCall(lightSourceShader);
 }
 
@@ -953,8 +887,8 @@ int main()
 	prepareModels(models);
 
 	//Cube map
-	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg", 
-		"textures/cubemap/mnight_lf.jpg", "textures/cubemap/mnight_up.jpg", "textures/cubemap/mnight_dn.jpg", 
+	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",
+		"textures/cubemap/mnight_up.jpg", "textures/cubemap/mnight_dn.jpg", 
 		"textures/cubemap/mnight_bk.jpg", "textures/cubemap/mnight_ft.jpg" });
 
 	//create frame buffer to render the shadow map
@@ -962,34 +896,6 @@ int main()
 
 	//buffer and cubetexture for point shadows
 	ShadowMap pointShadowmap = genPointShadowMap();
-
-	//The world position of a global directional light and it's color
-	glm::vec3 directionalLightDir(-0.2f, -1.0f, -0.9f);
-	glm::vec3 directionalLightColor(0.2f, 0.2f, 0.2f);
-	//
-	glm::vec3 pointLightPositions[] = {
-		glm::vec3(0.7f, 0.2f, 2.0f),
-		glm::vec3(1.2f, 0.2f, 0.5f),
-		glm::vec3(35.5f, 0.0f, -37.33f),
-		glm::vec3(41.0f, 10.5f, 35.0f)
-	};
-	glm::vec3 pointLightColors[] = {
-		glm::vec3(0.35f, 0.05f, 0.15f),
-		glm::vec3(1.75f, 1.75f, 1.75f),
-		glm::vec3(2.45f, 2.45f, 2.45f),
-		glm::vec3(0.35f, 0.35f, 0.35f)
-	};
-
-	//To display lightsources (debug rendering of wireframe versions)
-	std::vector<Model> primitives;
-	for (GLuint i = 0; i < sizeof(pointLightPositions) / sizeof(glm::vec3); i++)
-	{
-		Model primitive(new RawPrimitive(dataArrays::rectanglevertices, sizeof(dataArrays::rectanglevertices), pointLightColors[i]));
-		primitive.setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-		primitive.setRotation(glm::vec3(1.0f, 0.3f, 0.5f), 0.0f);
-
-		primitives.push_back(primitive);
-	}
 
 	//texts rendering
 	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT, "I never asked fo this");
@@ -1014,6 +920,7 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointShadowMap");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightShadows");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "viewerPos");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "view");
@@ -1022,6 +929,7 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointShadowMap");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "pointLightShadows");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "viewerPos");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(outlineShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(outlineShader->getProgramId(), "view");
@@ -1068,9 +976,24 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointShadowMap");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightShadows");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "viewerPos");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "pinnedView");
+
+	//To display lightsources (debug rendering of wireframe versions)
+	//Lights
+	LightingSystem lights;
+
+	std::vector<Model> primitives;
+	for (GLuint i = 0; i < lights.getNumPointLights(); i++)
+	{
+		Model primitive(new RawPrimitive( dataArrays::rectanglevertices, sizeof(dataArrays::rectanglevertices), lights.getPointLight(i).color ));
+		primitive.setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+		primitive.setRotation(glm::vec3(1.0f, 0.3f, 0.5f), 0.0f);
+
+		primitives.push_back(primitive);
+	}
 
 	GLdouble lastFrame = 0.0f;  	// Time of last frame
 	//the game loop, that keeps on running until we tell GLFW to stop
@@ -1091,7 +1014,7 @@ int main()
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
 		//Inputs
-		if (Inputs::keys[GLFW_KEY_MINUS])
+		/*if (Inputs::keys[GLFW_KEY_MINUS])
 		{
 			if (directionalLightColor.x > 0)
 				directionalLightColor -= 0.01f;
@@ -1107,7 +1030,7 @@ int main()
 		{
 			if (directionalLightColor.x < 1)
 				directionalLightColor += 0.01f;
-		}
+		}*/
 
 		// Check and call events
 		glfwPollEvents();
@@ -1122,9 +1045,9 @@ int main()
 		glm::mat4 view = theCamera->getView();
 
 		//Make some lights move around a bit				
-		pointLightPositions[0].x = -(GLfloat)sin(currentTime) + 0.5f;
+		/*pointLightPositions[0].x = -(GLfloat)sin(currentTime) + 0.5f;
 		pointLightPositions[0].y = -(GLfloat)cos(currentTime * 2) + 2.5f;
-		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;
+		pointLightPositions[1].x = -(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f;*/
 		
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -1133,11 +1056,11 @@ int main()
 		clearFrameBuffer(directionalShadowmap.shadowmapFBO);
 
 		//Set all the space transformations for all the relvant shadow shaders
-		glm::mat4 lightSpaceMatrix = setTransformationsForDirShadows(shadowMapShader->getProgramId(), directionalLightDir * (-26.0f));
-		setTransformationsForDirShadows(shadowMapBatchShader->getProgramId(), directionalLightDir * (-26.0f));
+		glm::mat4 lightSpaceMatrix = setTransformationsForDirShadows(shadowMapShader->getProgramId(), lights.getDirLight().direction * (-26.0f));
+		setTransformationsForDirShadows(shadowMapBatchShader->getProgramId(), lights.getDirLight().direction * (-26.0f));
 
 		renderCalls(shadowMapShader->getProgramId(), shadowMapBatchShader->getProgramId(), outlineShader->getProgramId(), 
-			outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, pointLightPositions, directionalLightDir);
+			outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, lights);
 
 		//render point shadow for the first point light (same viewport dimensions, as the directional, but the new frame buffer)
 		GLfloat pointLightFPlane = 0.0f;
@@ -1145,19 +1068,23 @@ int main()
 		{
 			clearFrameBuffer(pointShadowmap.shadowmapFBO);
 
-			pointLightFPlane = setPointShadowTransforms(pointShadowMapShader->getProgramId(), pointLightPositions[0]);
-			setPointShadowTransforms(pointShadowMapBatchShader->getProgramId(), pointLightPositions[0]);
+			pointLightFPlane = setPointShadowTransforms(pointShadowMapShader->getProgramId(), lights.getPointLight(0).position);
+			setPointShadowTransforms(pointShadowMapBatchShader->getProgramId(), lights.getPointLight(0).position);
 			renderCalls(pointShadowMapShader->getProgramId(), pointShadowMapBatchShader->getProgramId(), outlineShader->getProgramId(),
-				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, pointLightPositions, directionalLightDir);
+				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, lights);
 		}		
 
 		//Lights
-		//for main shader (individual draw calls)
-		setLightingParameters(mainShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
-			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
-		//for batch rendering shader
-		setLightingParameters(mainBatchShader, (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
-			theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
+		lights.setCameraDirection(theCamera->getCameraDirection());
+		lights.setCameraPosition(theCamera->getPosition());
+		lights.setLightingParameters(mainShader);
+		lights.setLightingParameters(mainBatchShader);
+
+		if (rendering::explodeMode)
+		{
+			glUniform1f(glGetUniformLocation(mainShader, "time"), (GLfloat)currentTime);
+			glUniform1f(glGetUniformLocation(mainBatchShader, "time"), (GLfloat)currentTime);
+		}
 
 		GlobalShaderVars::instance()->setMat4Var("projection", projection);
 		GlobalShaderVars::instance()->setMat4Var("view", view);
@@ -1182,7 +1109,7 @@ int main()
 			clearFrameBuffer(multisampleFBO);
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, pointLightPositions, directionalLightDir);
+				models, primitives, lights);
 
 			textField1->setText("I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps");
 			textField1->setPosition(20.0f, 680.0f);
@@ -1193,7 +1120,7 @@ int main()
 			if (rendering::renderNormals)
 				renderCalls(theNormalsShader->getProgramId(), theBatchNormalsShader->getProgramId(),
 				outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, pointLightPositions, directionalLightDir);
+				models, primitives, lights);
 
 			//Render the texture, containing the rendered scene to a full-screen quad
 			blitMSampledScene(multisampleFBO, sceneFBO);
@@ -1210,12 +1137,13 @@ int main()
 			clearFrameBuffer(gBuffer);
 
 			renderCalls(thegBuffShader->getProgramId(), thegBuffBatchShader->getProgramId(), outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, pointLightPositions, directionalLightDir);
+				models, primitives, lights);
 
 			//render gbuffuer data to fullscreen quad, perform lighting/shadow calculations per-pixel, basically, 
 			//instead of for all the fragments for all the vertices in the screen
-			setLightingParameters(theDeferredtingShader->getProgramId(), (GLfloat)currentTime, directionalLightColor, directionalLightDir, rendering::spotLightColor, theCamera->getCameraDirection(),
-				theCamera->getPosition(), pointLightPositions, pointLightColors, sizeof(pointLightPositions) / sizeof(glm::vec3));
+			lights.setLightingParameters(theDeferredtingShader->getProgramId());
+			if (rendering::explodeMode)
+				glUniform1f(glGetUniformLocation(theDeferredtingShader->getProgramId(), "time"), (GLfloat)currentTime);
 			renderGBufferData(theDeferredtingShader->getProgramId(), gBufferTextures, sizeof(gBufferTextures) / sizeof(GLuint),
 				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));
 
@@ -1250,7 +1178,7 @@ int main()
 			clearFrameBuffer(multisampleFBO);
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, pointLightPositions, directionalLightDir);
+				models, primitives, lights);
 
 			skyBox.drawCall(skyBoxShader->getProgramId());
 

@@ -44,6 +44,9 @@
     <ClCompile Include="GlobalShaderVars.cpp">
       <Filter>shadervars</Filter>
     </ClCompile>
+    <ClCompile Include="LightingSystem.cpp">
+      <Filter>lighting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -87,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="GlobalShaderVars.h">
       <Filter>shadervars</Filter>
+    </ClInclude>
+    <ClInclude Include="LightingSystem.h">
+      <Filter>lighting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +238,9 @@
     </Filter>
     <Filter Include="shadervars">
       <UniqueIdentifier>{c28c4ae7-8933-42b1-b290-982a0984167c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lighting">
+      <UniqueIdentifier>{be5215f4-88e0-4f55-ac92-4e261243b8be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

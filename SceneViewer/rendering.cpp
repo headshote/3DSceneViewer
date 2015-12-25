@@ -17,8 +17,6 @@ namespace rendering
 	GLfloat hdrExposure = 1.0f;
 
 	GLboolean deferredMode = false; 
-	
-	glm::vec3 spotLightColor(0.9f, 0.9f, 0.9f);
 
 	GLuint screenShaderId = 0;
 }

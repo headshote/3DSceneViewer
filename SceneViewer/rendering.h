@@ -23,8 +23,6 @@ namespace rendering
 
 	extern GLboolean deferredMode;
 
-	extern glm::vec3 spotLightColor;
-
 	extern GLuint screenShaderId;
 
 }
