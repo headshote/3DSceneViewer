@@ -44,7 +44,7 @@ namespace lighting
 		void setPointightPosition(const GLuint id, const glm::vec3& position);
 
 		DirectionalLight getDirLight();
-		PointLight getPointLight(GLuint id);
+		PointLight getPointLight(const GLuint id);
 		SpotLight getSpotLight();
 
 		GLuint getNumPointLights();
@@ -58,9 +58,9 @@ namespace lighting
 		GLfloat kl;
 		GLfloat kq;
 
-		void setDirectionalLight(GLuint shaderProgram);
-		void setPointLight(GLuint shaderProgram, GLuint lightId);
-		void setSpotLight(GLuint shaderProgram);
+		void setDirectionalLight(const GLuint shaderProgram);
+		void setPointLight(const GLuint shaderProgram, const GLuint lightId);
+		void setSpotLight(const GLuint shaderProgram);
 
 	};
 }

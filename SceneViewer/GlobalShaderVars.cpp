@@ -2,10 +2,6 @@
 
 using namespace shadervars;
 
-GlobalShaderVars::GlobalShaderVars()
-{
-}
-
 /*static*/ std::shared_ptr<GlobalShaderVars> GlobalShaderVars::theInstance;
 
 /*static*/ std::shared_ptr<GlobalShaderVars> GlobalShaderVars::instance()
@@ -13,6 +9,10 @@ GlobalShaderVars::GlobalShaderVars()
 	if (!theInstance.get())
 		theInstance.reset(new GlobalShaderVars());
 	return theInstance;
+}
+
+GlobalShaderVars::GlobalShaderVars()
+{
 }
 
 void GlobalShaderVars::addUIntVar(const std::string& varName)

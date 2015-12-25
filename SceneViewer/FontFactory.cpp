@@ -4,6 +4,13 @@ using namespace textandfonts;
 
 /*static*/ std::shared_ptr<FontFactory> FontFactory::theInstance;
 
+/*static*/ std::shared_ptr<FontFactory> FontFactory::instance()
+{
+	if (!theInstance.get())
+		theInstance.reset(new FontFactory());
+	return theInstance;
+}
+
 FontFactory::FontFactory()
 {
 	generateFontQuad();
@@ -45,11 +52,4 @@ std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(std:
 std::shared_ptr<::renderables::TextField> FontFactory::CreateRenderableText(const std::string& fontPath, const GLuint fontSize, const GLuint scrWidth, const GLuint scrHeight, const std::string& text)
 {
 	return std::shared_ptr<renderables::TextField>(new renderables::TextField(std::shared_ptr<SVFont>(new SVFont(quadVAO, quadVBO, fontPath, fontSize, scrWidth, scrHeight)), text));
-}
-
-/*static*/ std::shared_ptr<FontFactory> FontFactory::instance()
-{
-	if (!theInstance.get())
-		theInstance.reset(new FontFactory());
-	return theInstance;
 }

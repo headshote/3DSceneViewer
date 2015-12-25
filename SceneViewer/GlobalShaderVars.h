@@ -37,6 +37,9 @@ namespace shadervars
 	private:
 		static std::shared_ptr<GlobalShaderVars> theInstance;
 
+		//no copy constructors and assignments
+		GlobalShaderVars(const GlobalShaderVars&);
+		GlobalShaderVars& operator=(const GlobalShaderVars&);
 		GlobalShaderVars();
 
 		std::map<std::string, std::vector<GLuint>> varShaders;	//list of all the shaders, subscribed to this var

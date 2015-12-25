@@ -52,7 +52,7 @@ DirectionalLight LightingSystem::getDirLight()
 	return DirectionalLight(dirLight);
 }
 
-PointLight LightingSystem::getPointLight(GLuint id)
+PointLight LightingSystem::getPointLight(const GLuint id)
 {
 	return PointLight(pointLights[id]);
 }
@@ -97,7 +97,7 @@ void LightingSystem::setPointightPosition(const GLuint id, const glm::vec3& posi
 /**
 Lighting calculations for a directional (flobal light)
 */
-void LightingSystem::setDirectionalLight(GLuint shaderProgram)
+void LightingSystem::setDirectionalLight(const GLuint shaderProgram)
 {
 	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), dirLight.color.x * 0.2f, dirLight.color.y * 0.2f, dirLight.color.z * 0.2f);
 	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), dirLight.color.x, dirLight.color.y, dirLight.color.z);
@@ -108,7 +108,7 @@ void LightingSystem::setDirectionalLight(GLuint shaderProgram)
 /**
 Set all the params for a spotlight (transfered to a fragment shader via uniform)
 */
-void LightingSystem::setPointLight(GLuint shaderProgram, GLuint lightId)
+void LightingSystem::setPointLight(const GLuint shaderProgram, const GLuint lightId)
 {
 	glm::vec3 lightColor = pointLights[lightId].color;
 	glm::vec3 lightPosition = pointLights[lightId].position;
@@ -132,7 +132,7 @@ void LightingSystem::setPointLight(GLuint shaderProgram, GLuint lightId)
 /**
 Set all the params for a spotlight (transfered to a fragment shader via uniform)
 */
-void LightingSystem::setSpotLight(GLuint shaderProgram)
+void LightingSystem::setSpotLight(const GLuint shaderProgram)
 {
 	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.constant"), kc);
 	glUniform1f(glGetUniformLocation(shaderProgram, "spotlight.linear"), kl);
