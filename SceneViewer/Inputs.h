@@ -1,28 +1,63 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <memory>
+#include <vector>
+
 class Inputs
 {
 public:
-	Inputs();
+	static std::shared_ptr<Inputs> instance();
+
+	//A necessery evil, have to have event callbacks as static methods, statics just redirect the event processing
+	//to the Inputs singleton object
+	static void glfwMousePositionCallback(GLFWwindow* window, GLdouble xpos, GLdouble ypos);
+	static void glfwMouseScrollCallback(GLFWwindow* window, GLdouble xoffset, GLdouble yoffset);
+	static void glfwMouseClicksCallback(GLFWwindow* window, GLint button, GLint action, GLint mode);
+	static void glfwKeyCallback(GLFWwindow* window, GLint key, GLint scancode, GLint action, GLint mode);
+
 	~Inputs();
 
-	static GLfloat lastX;
-	static GLfloat lastY;
-	static GLfloat xoffset;
-	static GLfloat yoffset;
-	static GLboolean firstMouse;
+	void step(GLdouble timeStamp, GLdouble timeDelta);
 
-	static GLboolean mouseCapture;
+	GLboolean isKeyHeld(GLint key);
+	GLboolean isKeyPressed(GLint key);
+	GLboolean isKeyReleased(GLint key);
 
-	static GLdouble xScroll;
-	static GLdouble yScroll;
+	GLboolean isMouseHeld();
 
-	static GLboolean keys[1024];
-	static GLboolean justReleasedKeys[1024];
+	GLfloat mouseXOffset();
+	GLfloat mouseYOffset();
+	GLdouble mouseXScroll();
+	GLdouble mouseYScroll();
 
-	static void onScroll(GLdouble xoffset, GLdouble yoffse);
-	static void step(GLdouble timeStamp, GLdouble timeDelta);
-	static void onMouseMove(GLfloat xpos, GLfloat ypos);
+private:
+	static std::shared_ptr<Inputs> theInstance;
+
+	//no copy constructors and assignments
+	Inputs(const Inputs&);
+	Inputs& operator=(const Inputs&);
+	Inputs();
+
+	std::vector<GLboolean> justPressedKeys;
+	std::vector<GLboolean> justReleasedKeys;
+	std::vector<GLboolean> heldKeys;
+
+	GLfloat lastX;
+	GLfloat lastY;
+	GLfloat xoffset;
+	GLfloat yoffset;
+	GLboolean firstMouse;
+
+	GLboolean mouseCapture;
+
+	GLdouble xScroll;
+	GLdouble yScroll;
+
+	//Actual event processing goes on here
+	void onScroll(GLdouble xoffset, GLdouble yoffse);
+	void onMouseMove(GLfloat xpos, GLfloat ypos);
+	void onMouseCLick(GLFWwindow* window, GLint button, GLint action, GLint mode);
+	void onKey(GLint key, GLint scancode, GLint action, GLint mode);
 };
 

@@ -65,7 +65,7 @@ void Camera::step(const GLdouble time, const GLdouble deltaTime)
 {
 	//Fov change on mouse scrolls
 	if (fov >= 1.0f && fov <= 100.0f)
-		fov -= (GLfloat)Inputs::yScroll;
+		fov -= (GLfloat)Inputs::instance()->mouseYScroll();
 
 	if (fov <= 1.0f)
 		fov = 1.0f;
@@ -74,10 +74,10 @@ void Camera::step(const GLdouble time, const GLdouble deltaTime)
 		fov = 100.0f;
 
 	//Yaw, itch, rotatin camer fps-style on mouse movement
-	if (Inputs::mouseCapture)
+	if (Inputs::instance()->isMouseHeld())
 	{
-		yaw += Inputs::xoffset;
-		pitch += Inputs::yoffset;
+		yaw += Inputs::instance()->mouseXOffset();
+		pitch += Inputs::instance()->mouseYOffset();
 	}
 
 	if (pitch > 89.0f)
@@ -89,20 +89,20 @@ void Camera::step(const GLdouble time, const GLdouble deltaTime)
 
 	//Translating camera on key presses
 	GLfloat camspeed = cameraSpeed;
-	if (Inputs::keys[GLFW_KEY_LEFT_SHIFT])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_LEFT_SHIFT))
 		camspeed *= 10.5f;
 
-	if (Inputs::keys[GLFW_KEY_W])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_W))
 		position += camspeed * (GLfloat)deltaTime * direction;
-	if (Inputs::keys[GLFW_KEY_A])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_A))
 		position -= glm::normalize(glm::cross(direction, worldUp)) * camspeed * (GLfloat)deltaTime;
-	if (Inputs::keys[GLFW_KEY_S])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_S))
 		position -= camspeed * (GLfloat)deltaTime * direction;
-	if (Inputs::keys[GLFW_KEY_D])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_D))
 		position += glm::normalize(glm::cross(direction, worldUp)) * camspeed * (GLfloat)deltaTime;
-	if (Inputs::keys[GLFW_KEY_SPACE])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_SPACE))
 		position += worldUp * camspeed * (GLfloat)deltaTime;
-	if (Inputs::keys[GLFW_KEY_LEFT_CONTROL])
+	if (Inputs::instance()->isKeyHeld(GLFW_KEY_LEFT_CONTROL))
 		position += -worldUp * camspeed * (GLfloat)deltaTime;
 
 	view = glm::lookAt(position, position + direction, worldUp);

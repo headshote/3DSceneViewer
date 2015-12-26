@@ -51,94 +51,6 @@ const GLuint SHADOW_HEIGHT = 1536;
 
 const GLint NUM_FRAGMENT_SAMPLES = 4;
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-	//std::cout << "key press key: " << key << " scancode : " << scancode << " action : " << action << " mode : " << mode << std::endl;
-
-	//A one-time event, upon releasing a key (so that it won't be done repetedly, while key is held)
-	if (action == GLFW_RELEASE)
-	{
-		Inputs::justReleasedKeys[key] = true;
-
-		//Close window
-		if (key == GLFW_KEY_ESCAPE)
-			glfwSetWindowShouldClose(window, GL_TRUE);
-
-		//Switch between wireframe and fill mode
-		if (key == GLFW_KEY_ENTER)
-		{
-			GLint polygonMode;
-			glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
-
-			glPolygonMode(GL_FRONT_AND_BACK, polygonMode == GL_FILL ? GL_LINE : GL_FILL);			
-		}
-
-		//Switch between post-processing filters
-		if (key >= GLFW_KEY_1 &&  key <= GLFW_KEY_8)
-			rendering::screenShaderId = key - GLFW_KEY_1;
-
-		if (key == GLFW_KEY_R)
-			rendering::rearView = !rendering::rearView;
-
-		//Model outlines on/off
-		if (key == GLFW_KEY_Q)
-		{
-			rendering::highlightModels = !rendering::highlightModels;
-			rendering::explodeMode = false;
-			rendering::dotMode = false;
-			rendering::renderNormals = false;
-		}
-
-		if (key == GLFW_KEY_G)
-		{
-			rendering::dotMode = !rendering::dotMode;
-			rendering::explodeMode = false;
-			rendering::highlightModels = false;
-			rendering::renderNormals = false;
-		}
-
-		if (key == GLFW_KEY_X)
-		{
-			rendering::explodeMode = !rendering::explodeMode;
-			rendering::dotMode = false;
-			rendering::highlightModels = false;
-			rendering::renderNormals = false;
-		}
-
-		if (key == GLFW_KEY_Z)
-		{
-			rendering::renderNormals = !rendering::renderNormals;
-			rendering::dotMode = false;
-			rendering::highlightModels = false;
-			rendering::explodeMode = false;
-		}
-
-		if (key == GLFW_KEY_V)
-			rendering::pointLightShadows = !rendering::pointLightShadows;
-
-		if (key == GLFW_KEY_C)
-		{
-			rendering::deferredMode = !rendering::deferredMode;
-			std::cout << (rendering::deferredMode ? "Entering deferred rendering mode" : "Entering straightforward rendering mode") << std::endl;
-		}
-	}
-	
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
-	{
-		if (key == GLFW_KEY_LEFT_BRACKET)
-		{
-			rendering::hdrExposure -= 0.25f;
-			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
-		}
-		if (key == GLFW_KEY_RIGHT_BRACKET)
-		{
-			rendering::hdrExposure += 0.25f;
-			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
-		}
-	}
-
-	Inputs::keys[key] = action != GLFW_RELEASE;
-}
 
 GLFWwindow* setUpWindow(int width, int height)
 {
@@ -170,24 +82,13 @@ GLFWwindow* setUpWindow(int width, int height)
 	glViewport(0, 0, width, height);
 
 	//register the function with the proper callback via GLFW
-	glfwSetKeyCallback(window, key_callback);
+	glfwSetKeyCallback(window, Inputs::glfwKeyCallback);
 
-	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-		Inputs::onMouseMove((GLfloat)xpos, (GLfloat)ypos);
-	});
+	glfwSetCursorPosCallback(window, Inputs::glfwMousePositionCallback);
 
-	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-		Inputs::onScroll(xoffset, yoffset);
-	});
+	glfwSetScrollCallback(window, Inputs::glfwMouseScrollCallback);
 
-	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mode) {
-		//std::cout << "Mouse burron press: " << button << " action : " << action << " mode : " << mode << std::endl;
-		if (button == GLFW_MOUSE_BUTTON_1 || button == GLFW_MOUSE_BUTTON_3)
-		{
-			Inputs::mouseCapture = action == GLFW_PRESS;
-			glfwSetInputMode(window, GLFW_CURSOR, Inputs::mouseCapture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-		}
-	});
+	glfwSetMouseButtonCallback(window, Inputs::glfwMouseClicksCallback);
 
 	return window;
 }
@@ -1007,8 +908,86 @@ int main()
 
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
-		//Inputs
-		if (Inputs::keys[GLFW_KEY_MINUS])
+		//----Inputs
+		//---One-time ations, right upon the key release
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_ESCAPE)) //Close window
+			glfwSetWindowShouldClose(window, GL_TRUE);
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_ENTER)) 	//Switch between wireframe and fill mode
+		{
+			GLint polygonMode;
+			glGetIntegerv(GL_POLYGON_MODE, &polygonMode);
+
+			glPolygonMode(GL_FRONT_AND_BACK, polygonMode == GL_FILL ? GL_LINE : GL_FILL);
+		}
+
+		for (GLuint numKey = GLFW_KEY_1; numKey <= GLFW_KEY_8; ++numKey) //Switch between post-processing filters
+			if (Inputs::instance()->isKeyReleased(numKey))
+				rendering::screenShaderId = numKey - GLFW_KEY_1;
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_R))
+			rendering::rearView = !rendering::rearView;
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_Q)) //Model outlines on/off
+		{
+			rendering::highlightModels = !rendering::highlightModels;
+			rendering::explodeMode = false;
+			rendering::dotMode = false;
+			rendering::renderNormals = false;
+		}
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_G))
+		{
+			rendering::dotMode = !rendering::dotMode;
+			rendering::explodeMode = false;
+			rendering::highlightModels = false;
+			rendering::renderNormals = false;
+		}
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_X))
+		{
+			rendering::explodeMode = !rendering::explodeMode;
+			rendering::dotMode = false;
+			rendering::highlightModels = false;
+			rendering::renderNormals = false;
+		}
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_Z))
+		{
+			rendering::renderNormals = !rendering::renderNormals;
+			rendering::dotMode = false;
+			rendering::highlightModels = false;
+			rendering::explodeMode = false;
+		}
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_V))
+			rendering::pointLightShadows = !rendering::pointLightShadows;
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_C))
+		{
+			rendering::deferredMode = !rendering::deferredMode;
+			std::cout << (rendering::deferredMode ? "Entering deferred rendering mode" : "Entering straightforward rendering mode") << std::endl;
+		}
+
+		if (Inputs::instance()->isKeyReleased(GLFW_KEY_F))
+		{
+			GLfloat clorValue = lights.getSpotLight().color.x == 0.0f ? 0.5f : 0.0f;
+			lights.setSpotLightColor(glm::vec3(clorValue));
+		}
+		
+		//---continious actions
+		if (Inputs::instance()->isKeyHeld(GLFW_KEY_LEFT_BRACKET))
+		{
+			rendering::hdrExposure -= 0.25f;
+			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
+		}
+		if (Inputs::instance()->isKeyHeld(GLFW_KEY_RIGHT_BRACKET))
+		{
+			rendering::hdrExposure += 0.25f;
+			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
+		}
+		
+		if (Inputs::instance()->isKeyHeld(GLFW_KEY_MINUS))
 		{
 			const glm::vec3& directionalLightColor = lights.getDirLight().color;
 			if (directionalLightColor.x > 0)
@@ -1017,19 +996,14 @@ int main()
 				lights.setDirLightColor(glm::vec3(0.0f));
 		}
 
-		if (Inputs::keys[GLFW_KEY_EQUAL])
+		if (Inputs::instance()->isKeyHeld(GLFW_KEY_EQUAL))
 		{
 			const glm::vec3& directionalLightColor = lights.getDirLight().color;
 			if (directionalLightColor.x < 1)
 				lights.setDirLightColor(glm::vec3(directionalLightColor + 0.01f));
 		}
 
-		if (Inputs::justReleasedKeys[GLFW_KEY_F])
-		{
-			GLfloat clorValue = lights.getSpotLight().color.x == 0.0f ? 0.5f : 0.0f;
-			lights.setSpotLightColor(glm::vec3(clorValue));
-		}
-
+		//Clearing whatever was rendered during the previous frame
 		clearScreen();
 
 		//Calculate transformation matrices for our 3d space
@@ -1190,7 +1164,7 @@ int main()
 		// Swap the buffers
 		glfwSwapBuffers(window);
 
-		Inputs::step(currentTime, deltaTime);
+		Inputs::instance()->step(currentTime, deltaTime);
 	}
 
 	//When we're done with all framebuffer operations, do not forget to delete the framebuffer object
