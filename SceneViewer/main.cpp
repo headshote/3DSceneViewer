@@ -51,7 +51,6 @@ const GLuint SHADOW_HEIGHT = 1536;
 
 const GLint NUM_FRAGMENT_SAMPLES = 4;
 
-
 GLFWwindow* setUpWindow(int width, int height)
 {
 	//instantiate the GLFW window
@@ -661,9 +660,7 @@ int main()
 {
 	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (window == nullptr)
-	{
-		return -1;
-	}
+		return EXIT_FAILURE;
 
 	configureOpenGL();
 
@@ -1170,6 +1167,8 @@ int main()
 	//When we're done with all framebuffer operations, do not forget to delete the framebuffer object
 	glDeleteFramebuffers(1, &sceneFBO);
 	glDeleteFramebuffers(1, &multisampleFBO);
+	glDeleteFramebuffers(sizeof(pingpongFBOs) / sizeof(GLuint), pingpongFBOs);
+	glDeleteFramebuffers(1, &gBuffer);
 
 	//As soon as we exit the game loop we would like to properly clean/delete all resources that were allocated
 	glfwTerminate();
