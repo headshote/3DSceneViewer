@@ -1,6 +1,6 @@
 #include "Model.h"
 
-using namespace renderables;
+using namespace models;
 
 Model::Model(const GLchar* filePath, const GLboolean useNormalMaps)
 {
@@ -9,9 +9,9 @@ Model::Model(const GLchar* filePath, const GLboolean useNormalMaps)
 	initialize();
 }
 
-Model::Model(Renderable* renderable)
+Model::Model(renderables::Renderable* renderable)
 {
-	meshes.push_back(std::shared_ptr<Renderable>(renderable));
+	meshes.push_back(std::shared_ptr<renderables::Renderable>(renderable));
 
 	initialize();
 }
@@ -298,7 +298,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, const GLboolean useN
 		//located in the scene object.
 		//We thus want to retrieve these mesh indices, retrieve each mesh, process each mesh
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(std::shared_ptr<Renderable>(createMesh(mesh, scene, useNormalMaps, modelRootDir)));
+		meshes.push_back(std::shared_ptr<renderables::Renderable>(createMesh(mesh, scene, useNormalMaps, modelRootDir)));
 	}
 
 	// Then do the same for each of its children
@@ -311,7 +311,7 @@ void Model::processNode(aiNode* node, const aiScene* scene, const GLboolean useN
 /**
 	Creates Mesh object from an asimp mesh
 */
-Mesh* Model::createMesh(aiMesh* mesh, const aiScene* scene, const GLboolean useNormalMaps, const std::string& modelRootDir)
+renderables::Mesh* Model::createMesh(aiMesh* mesh, const aiScene* scene, const GLboolean useNormalMaps, const std::string& modelRootDir)
 {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
@@ -380,7 +380,7 @@ Mesh* Model::createMesh(aiMesh* mesh, const aiScene* scene, const GLboolean useN
 		}//piece of shit asimp won't work properly with mirrored normal maps, fuck this shit
 	}
 
-	return new Mesh(vertices, indices, textures);
+	return new renderables::Mesh(vertices, indices, textures);
 }
 
 /**
@@ -427,7 +427,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 /**
 	Load texture from file, a non-member function, that is packaged along with the Model class
 */
-GLuint renderables::loadTexture(const GLchar* filePath, const GLboolean isTransparent, const GLboolean gammaCorrect)
+GLuint models::loadTexture(const GLchar* filePath, const GLboolean isTransparent, const GLboolean gammaCorrect)
 {
 	int width, height;
 	unsigned char* image = SOIL_load_image(filePath, &width, &height, 0, SOIL_LOAD_RGBA);

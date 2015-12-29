@@ -13,7 +13,7 @@
 
 #include "Mesh.h"
 
-namespace renderables
+namespace models
 {
 	GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
 
@@ -21,7 +21,7 @@ namespace renderables
 	{
 	public:
 		explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
-		explicit Model(Renderable* renderable);
+		explicit Model(renderables::Renderable* renderable);
 		~Model();
 
 		void setTranslation(const glm::vec3 translation);
@@ -49,7 +49,7 @@ namespace renderables
 	private:
 		std::vector<Texture> textures_loaded;
 
-		std::vector<std::shared_ptr<Renderable>> meshes;
+		std::vector<std::shared_ptr<renderables::Renderable>> meshes;
 
 		glm::vec3 mTranslation;
 		glm::vec3 mScale;
@@ -69,7 +69,7 @@ namespace renderables
 
 		void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
 		void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
-		Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
+		renderables::Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
 		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
 	};
 }

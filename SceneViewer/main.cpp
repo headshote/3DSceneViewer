@@ -42,6 +42,8 @@ using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;
 using namespace lighting;
+using namespace models;
+
 
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;

@@ -5,9 +5,6 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>renderables</Filter>
-    </ClCompile>
     <ClCompile Include="RawPrimitive.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
@@ -47,12 +44,12 @@
     <ClCompile Include="LightingSystem.cpp">
       <Filter>lighting</Filter>
     </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
-      <Filter>renderables</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
       <Filter>renderables</Filter>
     </ClInclude>
     <ClInclude Include="RawPrimitive.h">
@@ -93,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="LightingSystem.h">
       <Filter>lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +241,9 @@
     </Filter>
     <Filter Include="lighting">
       <UniqueIdentifier>{be5215f4-88e0-4f55-ac92-4e261243b8be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{ceb563b7-195a-494d-9d31-ca0ae8dc54fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
