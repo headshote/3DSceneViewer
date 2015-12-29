@@ -19,7 +19,9 @@ namespace models
 		virtual void applyContextStateToModel(Model& model) = 0;
 
 	protected:
-		ModelRenderingContext(/*glm::vec3& translation, glm::vec3& scale, glm::vec3& rotationAxis, GLfloat angle*/);
+		ModelRenderingContext();
+
+		glm::mat4 createTransform(glm::vec3& translation, glm::vec3& scale, glm::vec3& rotationAxis, GLfloat angle);
 
 		void appendTransformation(glm::mat4& transform);
 
