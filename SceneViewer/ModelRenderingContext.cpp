@@ -2,24 +2,39 @@
 
 using namespace models;
 
-
 ModelRenderingContext::ModelRenderingContext()
 {
 
 }
 
-void ModelRenderingContext::appendTransformation(glm::mat4& transform)
+void ModelRenderingContext::appendTranslation(glm::vec3& translation)
 {
-	contextTransforms.push_back(transform);
+	cTranslations.push_back(translation);
 }
 
-glm::mat4 ModelRenderingContext::createTransform(glm::vec3& translation, glm::vec3& scale, glm::vec3& rotationAxis, GLfloat angle)
+void ModelRenderingContext::appendScale(glm::vec3& scale)
 {
-	glm::mat4 transform;
+	cScales.push_back(scale);
+}
 
-	transform = glm::translate(transform, translation);
-	transform = glm::scale(transform, scale);
-	transform = glm::rotate(transform, angle, rotationAxis);
+void ModelRenderingContext::appendRotation(glm::vec3& rotationAxis, GLfloat angle)
+{
+	cRotationAxes.push_back(rotationAxis);
+	cRotations.push_back(angle);
+}
 
-	return transform;
+void ModelRenderingContext::setTranslation(const glm::vec3 translation, GLuint transformId)
+{
+	cTranslations[transformId] = translation;
+}
+
+void ModelRenderingContext::setScale(const glm::vec3 scale, GLuint transformId)
+{
+	cScales[transformId] = scale;
+}
+
+void ModelRenderingContext::setRotation(const glm::vec3 rotationAxis, const GLfloat angle, GLuint transformId)
+{
+	cRotationAxes[transformId] = rotationAxis;
+	cRotations[transformId] = angle;
 }

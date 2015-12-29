@@ -50,6 +50,10 @@
     <ClCompile Include="ModelRenderingContext.cpp">
       <Filter>models</Filter>
     </ClCompile>
+    <ClCompile Include="SingleCallContext.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="BatchRenderContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -100,6 +104,10 @@
     <ClInclude Include="ModelRenderingContext.h">
       <Filter>models</Filter>
     </ClInclude>
+    <ClInclude Include="SingleCallContext.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="BatchRenderContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\batchNormalsVertex.glsl">

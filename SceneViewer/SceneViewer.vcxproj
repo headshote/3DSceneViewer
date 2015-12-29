@@ -81,6 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BatchRenderContext.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DataStructures.hpp" />
     <ClCompile Include="FontFactory.cpp" />
@@ -95,11 +96,13 @@
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SingleCallContext.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SVFont.cpp" />
     <ClCompile Include="TextField.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BatchRenderContext.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="dataArrays.h" />
     <ClInclude Include="FontFactory.h" />
@@ -113,6 +116,7 @@
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="rendering.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SingleCallContext.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SVFont.h" />
     <ClInclude Include="TextField.h" />

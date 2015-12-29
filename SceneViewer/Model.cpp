@@ -434,9 +434,9 @@ void Model::initializeWithContext(ModelRenderingContext* context)
 	context->applyContextStateToModel(*this);
 }
 
-void Model::renderWithContext(ModelRenderingContext* context)
+void Model::renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram)
 {
-	context->doRendering(*this);
+	context->doRendering(*this, shaderProgram);
 }
 
 /**
