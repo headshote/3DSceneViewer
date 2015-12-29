@@ -376,127 +376,30 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 	glEnable(GL_DEPTH_TEST);
 }
 
-void prepareModels(std::vector<Model>& models)
-{
-	Model& model = models[0];
-
-	for (GLuint i = 0; i < 25; i++)
-	{
-		model.setTranslation(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	for (GLuint i = 0; i < 45; i++)
-	{
-		model.setTranslation(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	for (GLuint i = 0; i < 70; i++)
-	{
-		model.setTranslation(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		model.scheduleRendering();
-	}
-
-	model.flushScheduledInstances();
-
-	Model& rock = models[3];
-	for (GLuint i = 0; i < 25; i++)
-	{
-		rock.setTranslation(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
-		rock.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f + 45.0f * i);
-		rock.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
-		rock.scheduleRendering();
-	}
-	rock.flushScheduledInstances();
-
-	Model& planet = models[4];
-	for (GLuint i = 0; i < 5; i++)
-	{
-		planet.setTranslation(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
-		planet.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 2.0f * i);
-		planet.setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 20.0f + 25.0f * i);
-		planet.scheduleRendering();
-	}
-	planet.flushScheduledInstances();
-}
-
 /**
 	Rendering models, reuse loaded models from hdd, just transform them and render whatever amount of times during the main loop iteration
 */
-void renderCalls(GLuint shaderProgram, GLuint batchShaderProgram, GLuint outlineShader, GLuint outlineBatchShader, GLuint lightSourceShader, std::vector<Model>& models,
-	std::vector<Model>& primitives, LightingSystem& lights)
+void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader,
+	std::vector<Model>& models, std::map<std::string, std::vector<ModelRenderingContext*>>& modelContexts, std::vector<Model>& primitives, LightingSystem& lights)
 {
-	glEnable(GL_CULL_FACE);	//3d meshes, backface cull
-	glUseProgram(batchShaderProgram);
+	for (GLuint i = 0; i < models.size(); ++i)
+	{
+		Model& model = models[i];
 
-	Model& model = models[0];
+		std::vector<ModelRenderingContext*> currentMContexts = modelContexts[model.getID()];
 
-	if (rendering::highlightModels)
-		models[3].batchRenderScheduledInstances(batchShaderProgram);// model.batchRenderOutlined(batchShaderProgram, outlineBatchShader);
-	else
-		models[3].batchRenderScheduledInstances(batchShaderProgram);
+		for (GLuint j = 0; j < currentMContexts.size(); ++j)
+		{
+			model.renderWithContext(currentMContexts[j], shaderProgram, batchShaderProgram);
+		}
+	}
 
-	if (rendering::highlightModels)
-		models[4].batchRenderScheduledInstances(batchShaderProgram);// model.batchRenderOutlined(batchShaderProgram, outlineBatchShader);
-	else
-		models[4].batchRenderScheduledInstances(batchShaderProgram);
-
-	if (rendering::highlightModels)
-		model.batchRenderScheduledInstances(batchShaderProgram);// model.batchRenderOutlined(batchShaderProgram, outlineBatchShader);
-	else
-		model.batchRenderScheduledInstances(batchShaderProgram);
-
-	glUseProgram(shaderProgram);
-
-	model.setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())));
-	model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime());
-	if (rendering::highlightModels)
+	/*if (rendering::highlightModels)
 		model.drawOutlined(shaderProgram, outlineShader);
 	else
-		model.drawCall(shaderProgram);
-
-	glDisable(GL_CULL_FACE);	//2d quads, no cull
-
-	models[6].setTranslation(glm::vec3(0.0f, 0.5f, 0.0f));
-	models[6].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
-	models[6].drawCall(shaderProgram);
-	models[6].setTranslation(glm::vec3(0.0f, 0.0f, 0.52f));
-	models[6].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-	models[6].drawCall(shaderProgram);
-
-	models[7].setTranslation(glm::vec3(1.1f, 0.5f, 0.0f));
-	models[7].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f); 
-	models[7].drawCall(shaderProgram);
-	models[7].setTranslation(glm::vec3(1.1f, 0.0f, 0.52f));
-	models[7].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-	models[7].drawCall(shaderProgram);
-
-	models[8].setTranslation(glm::vec3(-1.1f, 0.5f, 0.0f));
-	models[8].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
-	models[8].drawCall(shaderProgram);
-	models[8].setTranslation(glm::vec3(-1.1f, 0.0f, 0.52f));
-	models[8].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-	models[8].drawCall(shaderProgram);
-
-	models[9].setTranslation(glm::vec3(-2.1f, 0.5f, 0.0f));
-	models[9].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), 0.0f);
-	models[9].drawCall(shaderProgram);
-	models[9].setTranslation(glm::vec3(-2.1f, 0.0f, 0.52f));
-	models[9].setRotation(glm::vec3(1.0f, 0.0f, 0.0f), -90.0f);
-	models[9].drawCall(shaderProgram);
-
-	models[5].drawCall(shaderProgram);
-
-	models[1].drawCall(shaderProgram);
-	
-	models[2].drawCall(shaderProgram);
+		model.drawCall(shaderProgram);*/
 
 	//Render lightsources (as wireframe)
-	glUseProgram(lightSourceShader);
 	GLuint i = 0;
 	for ( auto iterator = primitives.begin(); iterator != primitives.end(); i++, iterator++)
 	{
@@ -742,45 +645,113 @@ int main()
 
 	//Load the models
 	std::vector<Model> models;
-	Model model1("models/nanosuit/nanosuit.obj");
-	model1.setScale(glm::vec3(0.33f, 0.33f, 0.33f));
-	models.push_back(model1);
+	models.push_back(Model("models/nanosuit/nanosuit.obj"));		
 	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
-	Model model2(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)));
-	model2.setTranslation(glm::vec3(-1.5f, 0.0f, -0.48f));
-	models.push_back(model2);
+	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));		
 	GLuint glassTexture[] = { loadTexture("textures/blending_transparent_window.png", false, false), loadTexture("textures/mt_specular.png") };
-	Model model3(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0));
-	model3.setTranslation(glm::vec3(0.5f, 0.0f, -0.48f));
-	models.push_back(model3);
+	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
 	models.push_back(Model("models/rock/rock.obj"));
 	models.push_back(Model("models/planet/planet.obj"));
 	//5
 	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::planeVertices, sizeof(dataArrays::planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint))));
+	models.push_back(Model(new Mesh(dataArrays::planeVertices, sizeof(dataArrays::planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint)), "floor1"));
 	//6
 	GLuint brickTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png"), loadTexture("textures/brickwall_normal.jpg") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint))));
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint)), "brick1"));
 	//7
 	GLuint brickPlainTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint))));
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint)), "brick2"));
 	//8
 	GLuint brickParallaxTexture[] = { 
 		loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
 		loadTexture("textures/parallax_brix/specular.png"),
 		loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
 		loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint))));
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint)), "brick3"));
 	//9
 	GLuint tbParallaxTexture[] = {
 		loadTexture("textures/woodbox/wood.png", false, false),
 		loadTexture("textures/woodbox/specular.png"),
 		loadTexture("textures/woodbox/toy_box_normal.png"),
 		loadTexture("textures/woodbox/toy_box_disp.png") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint))));
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
 
-	//Pre-cache transforms for a lot of model instances
-	prepareModels(models);
+	//Pre-cache transforms for a lot of model instances, create contexts
+	std::map<std::string, std::vector<ModelRenderingContext*>> modelContexts;
+	for (GLuint i = 0; i < models.size(); ++i)
+		modelContexts[models[i].getID()] = std::vector<ModelRenderingContext*>();
+
+	std::vector<glm::vec3> translations;
+	std::vector<glm::vec3> scales(25 + 45 + 70, glm::vec3(0.33f));;
+	std::vector<glm::vec3> rotationAxes;
+	std::vector<GLfloat> rotationAngles;
+	for (GLuint i = 0; i < 25; i++)
+	{
+		translations.push_back(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
+		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+		rotationAngles.push_back( 45.0f + 2.0f * i);
+	}
+	for (GLuint i = 0; i < 45; i++)
+	{
+		translations.push_back(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
+		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+		rotationAngles.push_back(45.0f + 2.0f * i);
+	}
+	for (GLuint i = 0; i < 70; i++)
+	{
+		translations.push_back(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
+		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+		rotationAngles.push_back(45.0f + 2.0f * i);
+	}
+	modelContexts[models[0].getID()].push_back( new BatchRenderContext(translations, scales, rotationAxes, rotationAngles) );
+
+	std::vector<glm::vec3>().swap(translations);
+	std::vector<glm::vec3>(25, glm::vec3(1.0f)).swap(scales);
+	std::vector<glm::vec3>().swap(rotationAxes);
+	std::vector<GLfloat>().swap(rotationAngles);
+	for (GLuint i = 0; i < 25; i++)
+	{
+		translations.push_back(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
+		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
+		rotationAngles.push_back(30.0f + 45.0f * i);
+	}
+	modelContexts[models[3].getID()].push_back(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles));
+
+	std::vector<glm::vec3>().swap(translations);
+	std::vector<glm::vec3>(5, glm::vec3(1.0f)).swap(scales);
+	std::vector<glm::vec3>().swap(rotationAxes);
+	std::vector<GLfloat>().swap(rotationAngles);
+	for (GLuint i = 0; i < 5; i++)
+	{
+		translations.push_back(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
+		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
+		rotationAngles.push_back(45.0f + 2.0f * i);
+	}
+	modelContexts[models[4].getID()].push_back(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles));
+
+	modelContexts[models[1].getID()].push_back(new SingleCallContext(glm::vec3(-1.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[2].getID()].push_back(new SingleCallContext(glm::vec3(0.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[5].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[6].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[6].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
+	modelContexts[models[7].getID()].push_back(new SingleCallContext(glm::vec3(1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[7].getID()].push_back(new SingleCallContext(glm::vec3(1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
+	modelContexts[models[8].getID()].push_back(new SingleCallContext(glm::vec3(-1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[8].getID()].push_back(new SingleCallContext(glm::vec3(-1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
+	modelContexts[models[9].getID()].push_back(new SingleCallContext(glm::vec3(-2.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
+	modelContexts[models[9].getID()].push_back(new SingleCallContext(glm::vec3(-2.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
+
+	for (GLuint i = 0; i < models.size(); ++i)
+	{
+		Model& model = models[i];
+
+		std::vector<ModelRenderingContext*> currentMContexts = modelContexts[model.getID()];
+
+		for (GLuint j = 0; j < currentMContexts.size(); ++j)
+		{
+			model.initializeWithContext(currentMContexts[j]);
+		}
+	}
 
 	//Cube map
 	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",
@@ -884,7 +855,7 @@ int main()
 	std::vector<Model> primitives;
 	for (GLuint i = 0; i < lights.getNumPointLights(); i++)
 	{
-		Model primitive(new RawPrimitive( dataArrays::rectanglevertices, sizeof(dataArrays::rectanglevertices), lights.getPointLight(i).color ));
+		Model primitive(new RawPrimitive( dataArrays::rectanglevertices, sizeof(dataArrays::rectanglevertices), lights.getPointLight(i).color ), "lghtsrc" + i);
 		primitive.setScale(glm::vec3(0.25f, 0.25f, 0.25f));
 		primitive.setRotation(glm::vec3(1.0f, 0.3f, 0.5f), 0.0f);
 
@@ -1017,7 +988,11 @@ int main()
 
 		//Make some lights move around a bit		
 		lights.setPointightPosition(0, glm::vec3(-(GLfloat)sin(currentTime) + 0.5f, -(GLfloat)cos(currentTime * 2) + 2.5f, 2.0f));
-		lights.setPointightPosition(1, glm::vec3(-(GLfloat)sin(currentTime * 0.9f) * 1.25f + 0.5f, 0.2f, 0.5f));
+		lights.setPointightPosition(1, glm::vec3(-(GLfloat)sin(currentTime * 0.9f) * 1.25f + 50.5f, 0.2f, 0.5f));
+
+		//make some models move around a bit
+		/*model.setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())));
+		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime());*/
 		
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -1030,7 +1005,7 @@ int main()
 		setTransformationsForDirShadows(shadowMapBatchShader->getProgramId(), lights.getDirLight().direction * (-26.0f));
 
 		renderCalls(shadowMapShader->getProgramId(), shadowMapBatchShader->getProgramId(), outlineShader->getProgramId(), 
-			outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, lights);
+			outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, modelContexts, primitives, lights);
 
 		//render point shadow for the first point light (same viewport dimensions, as the directional, but the new frame buffer)
 		GLfloat pointLightFPlane = 0.0f;
@@ -1041,7 +1016,7 @@ int main()
 			pointLightFPlane = setPointShadowTransforms(pointShadowMapShader->getProgramId(), lights.getPointLight(0).position);
 			setPointShadowTransforms(pointShadowMapBatchShader->getProgramId(), lights.getPointLight(0).position);
 			renderCalls(pointShadowMapShader->getProgramId(), pointShadowMapBatchShader->getProgramId(), outlineShader->getProgramId(),
-				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, primitives, lights);
+				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, modelContexts, primitives, lights);
 		}		
 
 		//Lights
@@ -1079,7 +1054,7 @@ int main()
 			clearFrameBuffer(multisampleFBO);
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, lights);
+				models, modelContexts, primitives, lights);
 
 			textField1->setText("I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps");
 			textField1->setPosition(20.0f, 680.0f);
@@ -1090,7 +1065,7 @@ int main()
 			if (rendering::renderNormals)
 				renderCalls(theNormalsShader->getProgramId(), theBatchNormalsShader->getProgramId(),
 				outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, lights);
+				models, modelContexts, primitives, lights);
 
 			//Render the texture, containing the rendered scene to a full-screen quad
 			blitMSampledScene(multisampleFBO, sceneFBO);
@@ -1107,7 +1082,7 @@ int main()
 			clearFrameBuffer(gBuffer);
 
 			renderCalls(thegBuffShader->getProgramId(), thegBuffBatchShader->getProgramId(), outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, lights);
+				models, modelContexts, primitives, lights);
 
 			//render gbuffuer data to fullscreen quad, perform lighting/shadow calculations per-pixel, basically, 
 			//instead of for all the fragments for all the vertices in the screen
@@ -1148,7 +1123,7 @@ int main()
 			clearFrameBuffer(multisampleFBO);
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
-				models, primitives, lights);
+				models, modelContexts, primitives, lights);
 
 			skyBox.drawCall(skyBoxShader->getProgramId());
 

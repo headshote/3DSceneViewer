@@ -16,7 +16,7 @@ namespace models
 	public:
 		virtual void applyContextStateToModel(Model& model) = 0;
 
-		virtual void doRendering(Model& model, const GLuint shaderProgram) = 0;
+		virtual void doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader) = 0;
 
 		void setTranslation(const glm::vec3 translation, GLuint transformId);
 		void setScale(const glm::vec3 scale, GLuint transformId);
@@ -34,6 +34,8 @@ namespace models
 		std::vector<glm::vec3> cTranslations;
 		std::vector<glm::vec3> cScales;
 		std::vector<glm::vec3> cRotationAxes;
-		std::vector<GLfloat> cRotations;;
+		std::vector<GLfloat> cRotations;
+
+		GLboolean cullFaces;
 	};
 }

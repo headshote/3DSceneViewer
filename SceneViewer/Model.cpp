@@ -2,14 +2,14 @@
 
 using namespace models;
 
-Model::Model(const GLchar* filePath, const GLboolean useNormalMaps)
+Model::Model(const GLchar* filePath, const GLboolean useNormalMaps) : mId(filePath)
 {
 	loadModel(filePath, useNormalMaps);
 
 	initialize();
 }
 
-Model::Model(renderables::Renderable* renderable)
+Model::Model(renderables::Renderable* renderable, const std::string id) : mId(id)
 {
 	meshes.push_back(std::shared_ptr<renderables::Renderable>(renderable));
 
@@ -100,6 +100,8 @@ void Model::rotateBy(const glm::vec3& rotationAxis, const GLfloat angle)
 
 void Model::drawCall(const GLuint shaderProgram)
 {
+	glUseProgram(shaderProgram);
+
 	setUniformMaxtrix(shaderProgram, "model", transformation);
 
 	for (GLuint i = 0; i < meshes.size(); i++)
@@ -213,6 +215,8 @@ void Model::flushScheduledInstances()
 
 void Model::batchRenderScheduledInstances(const GLuint shaderProgram)
 {
+	glUseProgram(shaderProgram);
+
 	for (GLuint i = 0; i < meshes.size(); i++)
 		meshes[i]->drawBatch(shaderProgram, batchedInstanceTransforms.size());
 }
@@ -434,9 +438,14 @@ void Model::initializeWithContext(ModelRenderingContext* context)
 	context->applyContextStateToModel(*this);
 }
 
-void Model::renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram)
+void Model::renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram, const GLuint batchShader)
 {
-	context->doRendering(*this, shaderProgram);
+	context->doRendering(*this, shaderProgram, batchShader);
+}
+
+std::string Model::getID()
+{
+	return mId;
 }
 
 /**
@@ -477,3 +486,4 @@ GLuint models::loadTexture(const GLchar* filePath, const GLboolean isTransparent
 
 	return texture;
 }
+

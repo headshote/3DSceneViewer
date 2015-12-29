@@ -27,7 +27,7 @@ namespace models
 	{
 	public:
 		explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
-		explicit Model(renderables::Renderable* renderable);
+		explicit Model(renderables::Renderable* renderable, const std::string id);
 		~Model();
 
 		void setTranslation(const glm::vec3 translation);
@@ -42,7 +42,7 @@ namespace models
 
 		/*Pretty mych only actually duing work, when batchrendering context is used, initializes transforms before rendering loop, call once, then use batch context*/
 		void initializeWithContext(ModelRenderingContext* context);
-		void renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram);
+		void renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram, const GLuint batchShader);
 
 		void drawCall(const GLuint shaderProgram);
 		void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
@@ -56,6 +56,8 @@ namespace models
 		void translateBy(const glm::vec3& translation);
 		void scaleBy(const glm::vec3& scale);
 		void rotateBy(const glm::vec3& rotationAxis, const GLfloat angle);
+
+		std::string getID();
 	private:
 		std::vector<Texture> textures_loaded;
 
@@ -71,6 +73,8 @@ namespace models
 		std::vector<glm::mat4> batchedInstanceTransforms;
 
 		glm::mat4 transformation;	//model transformation
+
+		std::string mId;
 
 		void setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value);
 
