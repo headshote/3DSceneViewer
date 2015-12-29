@@ -47,6 +47,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>models</Filter>
     </ClCompile>
+    <ClCompile Include="ModelRenderingContext.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -92,6 +95,9 @@
       <Filter>lighting</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelRenderingContext.h">
       <Filter>models</Filter>
     </ClInclude>
   </ItemGroup>

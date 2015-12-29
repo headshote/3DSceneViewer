@@ -5,6 +5,9 @@
 #include <iostream>
 #include <memory>
 
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
 #include <SOIL/SOIL.h>
 
 #include <assimp/Importer.hpp>
@@ -12,10 +15,13 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
+#include "ModelRenderingContext.h"
 
 namespace models
 {
 	GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
+
+	class ModelRenderingContext;
 
 	class Model
 	{
@@ -27,11 +33,16 @@ namespace models
 		void setTranslation(const glm::vec3 translation);
 		void setScale(const glm::vec3 scale);
 		void setRotation(const glm::vec3 rotationAxis, const GLfloat angle);
+		void setTransformation(const glm::mat4 transform);
 
 		glm::vec3 getTranslation();
 		glm::vec3 getScale();
 		glm::vec3 getRotationAxis();
 		GLfloat getRotationAngle();
+
+		/*Pretty mych only actually duing work, when batchrendering context is used, initializes transforms before rendering loop, call once, then use batch context*/
+		void initializeWithContext(ModelRenderingContext* context);
+		void renderWithContext(ModelRenderingContext* context);
 
 		void drawCall(const GLuint shaderProgram);
 		void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
@@ -45,7 +56,6 @@ namespace models
 		void translateBy(const glm::vec3& translation);
 		void scaleBy(const glm::vec3& scale);
 		void rotateBy(const glm::vec3& rotationAxis, const GLfloat angle);
-	protected:
 	private:
 		std::vector<Texture> textures_loaded;
 

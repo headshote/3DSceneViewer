@@ -39,6 +39,11 @@ void Model::setRotation(const glm::vec3 rotationAxis, const GLfloat angle)
 	updateTransformation();
 }
 
+void Model::setTransformation(const glm::mat4 transform)
+{
+	transformation = transform;
+}
+
 glm::vec3 Model::getTranslation()
 {
 	return mTranslation;
@@ -66,6 +71,16 @@ void Model::initialize()
 	mRotation = 0.0f;
 	mRotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 	updateTransformation();
+}
+
+void Model::updateTransformation()
+{
+	glm::mat4 trans;
+	trans = glm::translate(trans, mTranslation);
+	trans = glm::scale(trans, mScale);
+	trans = glm::rotate(trans, mRotation, mRotationAxis);
+
+	transformation = trans;
 }
 
 void Model::translateBy(const glm::vec3& translation)
@@ -254,16 +269,6 @@ void Model::batchRenderOutlined(const GLuint renderShader, const GLuint outlineS
 	glUseProgram(renderShader);
 }
 
-void Model::updateTransformation()
-{
-	glm::mat4 trans;
-	trans = glm::translate(trans, mTranslation);
-	trans = glm::scale(trans, mScale);
-	trans = glm::rotate(trans, mRotation, mRotationAxis);
-
-	transformation = trans;
-}
-
 void Model::setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformName, const glm::mat4& value)
 {
 	GLint uniform = glGetUniformLocation(shaderProgram, uniformName);
@@ -422,6 +427,16 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	}
 
 	return textures;
+}
+
+void Model::initializeWithContext(ModelRenderingContext* context)
+{
+	context->applyContextStateToModel(*this);
+}
+
+void Model::renderWithContext(ModelRenderingContext* context)
+{
+	context->doRendering(*this);
 }
 
 /**

@@ -90,6 +90,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelRenderingContext.cpp" />
     <ClCompile Include="RawPrimitive.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="rendering.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="LightingSystem.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelRenderingContext.h" />
     <ClInclude Include="RawPrimitive.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="rendering.h" />
