@@ -16,7 +16,7 @@ void SingleCallContext::applyContextStateToModel(Model& model)
 	;
 }
 
-void SingleCallContext::doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader)
+void SingleCallContext::doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader, const GLuint outlineShader, const GLuint batchOutlineShader)
 {
 	if ( cullFaces)
 		glEnable(GL_CULL_FACE);	//3d meshes, backface cull
@@ -26,5 +26,9 @@ void SingleCallContext::doRendering(Model& model, const GLuint shaderProgram, co
 	model.setTranslation(cTranslations[0]);
 	model.setScale(cScales[0]);
 	model.setRotation(cRotationAxes[0], cRotations[0]);
-	model.drawCall(shaderProgram);
+
+	if (rendering::highlightModels)
+		model.drawOutlined(shaderProgram, outlineShader);
+	else
+		model.drawCall(shaderProgram);
 }

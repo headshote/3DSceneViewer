@@ -13,7 +13,7 @@ namespace models
 
 		virtual void applyContextStateToModel(Model& model);
 
-		virtual void doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader);
+		virtual void doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader, const GLuint outlineShader, const GLuint batchOutlineShader);
 
 	};
 }

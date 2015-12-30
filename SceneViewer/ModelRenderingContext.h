@@ -9,14 +9,12 @@
 
 namespace models
 {
-	class Model;
-
 	class ModelRenderingContext
 	{
 	public:
 		virtual void applyContextStateToModel(Model& model) = 0;
 
-		virtual void doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader) = 0;
+		virtual void doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader, const GLuint outlineShader, const GLuint batchOutlineShader) = 0;
 
 		void setTranslation(const glm::vec3 translation, GLuint transformId);
 		void setScale(const glm::vec3 scale, GLuint transformId);

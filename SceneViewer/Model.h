@@ -15,13 +15,10 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
-#include "ModelRenderingContext.h"
 
 namespace models
 {
 	GLuint loadTexture(const GLchar* filePath, const GLboolean isTransparent = false, const GLboolean gammaCorrect = false);
-
-	class ModelRenderingContext;
 
 	class Model
 	{
@@ -39,10 +36,6 @@ namespace models
 		glm::vec3 getScale();
 		glm::vec3 getRotationAxis();
 		GLfloat getRotationAngle();
-
-		/*Pretty mych only actually duing work, when batchrendering context is used, initializes transforms before rendering loop, call once, then use batch context*/
-		void initializeWithContext(ModelRenderingContext* context);
-		void renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram, const GLuint batchShader);
 
 		void drawCall(const GLuint shaderProgram);
 		void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);

@@ -433,16 +433,6 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	return textures;
 }
 
-void Model::initializeWithContext(ModelRenderingContext* context)
-{
-	context->applyContextStateToModel(*this);
-}
-
-void Model::renderWithContext(ModelRenderingContext* context, const GLuint shaderProgram, const GLuint batchShader)
-{
-	context->doRendering(*this, shaderProgram, batchShader);
-}
-
 std::string Model::getID()
 {
 	return mId;

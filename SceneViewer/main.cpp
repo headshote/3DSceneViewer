@@ -380,24 +380,19 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 	Rendering models, reuse loaded models from hdd, just transform them and render whatever amount of times during the main loop iteration
 */
 void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader,
-	std::vector<Model>& models, std::map<std::string, std::vector<ModelRenderingContext*>>& modelContexts, std::vector<Model>& primitives, LightingSystem& lights)
+	std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts, std::vector<Model>& primitives, LightingSystem& lights)
 {
 	for (GLuint i = 0; i < models.size(); ++i)
 	{
 		Model& model = models[i];
 
-		std::vector<ModelRenderingContext*> currentMContexts = modelContexts[model.getID()];
+		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
 		{
-			model.renderWithContext(currentMContexts[j], shaderProgram, batchShaderProgram);
+			currentMContexts[j]->doRendering(model, shaderProgram, batchShaderProgram, outlineShader, outlineBatchShader);
 		}
 	}
-
-	/*if (rendering::highlightModels)
-		model.drawOutlined(shaderProgram, outlineShader);
-	else
-		model.drawCall(shaderProgram);*/
 
 	//Render lightsources (as wireframe)
 	GLuint i = 0;
@@ -677,9 +672,9 @@ int main()
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
 
 	//Pre-cache transforms for a lot of model instances, create contexts
-	std::map<std::string, std::vector<ModelRenderingContext*>> modelContexts;
+	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
 	for (GLuint i = 0; i < models.size(); ++i)
-		modelContexts[models[i].getID()] = std::vector<ModelRenderingContext*>();
+		modelContexts[models[i].getID()] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 
 	std::vector<glm::vec3> translations;
 	std::vector<glm::vec3> scales(25 + 45 + 70, glm::vec3(0.33f));;
@@ -703,7 +698,9 @@ int main()
 		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
 		rotationAngles.push_back(45.0f + 2.0f * i);
 	}
-	modelContexts[models[0].getID()].push_back( new BatchRenderContext(translations, scales, rotationAxes, rotationAngles) );
+	std::shared_ptr<ModelRenderingContext> ourHeroOurHero(new SingleCallContext(glm::vec3(1.0f, 0.0f, -2.0f), glm::vec3(0.33f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f));
+	modelContexts[models[0].getID()].push_back(ourHeroOurHero);
+	modelContexts[models[0].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
 
 	std::vector<glm::vec3>().swap(translations);
 	std::vector<glm::vec3>(25, glm::vec3(1.0f)).swap(scales);
@@ -715,7 +712,7 @@ int main()
 		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
 		rotationAngles.push_back(30.0f + 45.0f * i);
 	}
-	modelContexts[models[3].getID()].push_back(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles));
+	modelContexts[models[3].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
 
 	std::vector<glm::vec3>().swap(translations);
 	std::vector<glm::vec3>(5, glm::vec3(1.0f)).swap(scales);
@@ -727,30 +724,30 @@ int main()
 		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
 		rotationAngles.push_back(45.0f + 2.0f * i);
 	}
-	modelContexts[models[4].getID()].push_back(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles));
+	modelContexts[models[4].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
 
-	modelContexts[models[1].getID()].push_back(new SingleCallContext(glm::vec3(-1.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[2].getID()].push_back(new SingleCallContext(glm::vec3(0.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[5].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[6].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[6].getID()].push_back(new SingleCallContext(glm::vec3(0.0f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
-	modelContexts[models[7].getID()].push_back(new SingleCallContext(glm::vec3(1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[7].getID()].push_back(new SingleCallContext(glm::vec3(1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
-	modelContexts[models[8].getID()].push_back(new SingleCallContext(glm::vec3(-1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[8].getID()].push_back(new SingleCallContext(glm::vec3(-1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
-	modelContexts[models[9].getID()].push_back(new SingleCallContext(glm::vec3(-2.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false));
-	modelContexts[models[9].getID()].push_back(new SingleCallContext(glm::vec3(-2.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false));
+	modelContexts[models[1].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[2].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[5].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[6].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[6].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
+	modelContexts[models[7].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[7].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
+	modelContexts[models[8].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[8].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
+	modelContexts[models[9].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-2.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
+	modelContexts[models[9].getID()].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-2.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
 
+	//applies contexts to their models, because some context might have a lasting effect on the model's state
+	//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO
 	for (GLuint i = 0; i < models.size(); ++i)
 	{
 		Model& model = models[i];
 
-		std::vector<ModelRenderingContext*> currentMContexts = modelContexts[model.getID()];
+		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-		{
-			model.initializeWithContext(currentMContexts[j]);
-		}
+			currentMContexts[j]->applyContextStateToModel(model);
 	}
 
 	//Cube map
@@ -991,8 +988,8 @@ int main()
 		lights.setPointightPosition(1, glm::vec3(-(GLfloat)sin(currentTime * 0.9f) * 1.25f + 50.5f, 0.2f, 0.5f));
 
 		//make some models move around a bit
-		/*model.setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())));
-		model.setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime());*/
+		ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
+		ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
 		
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);

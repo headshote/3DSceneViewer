@@ -32,7 +32,7 @@ void BatchRenderContext::applyContextStateToModel(Model& model)
 	model.flushScheduledInstances();
 }
 
-void BatchRenderContext::doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader)
+void BatchRenderContext::doRendering(Model& model, const GLuint shaderProgram, const GLuint batchShader, const GLuint outlineShader, const GLuint batchOutlineShader)
 {
 	if (cullFaces)
 		glEnable(GL_CULL_FACE);	//3d meshes, backface cull
