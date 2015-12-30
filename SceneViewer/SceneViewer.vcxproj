@@ -84,6 +84,7 @@
     <ClCompile Include="BatchRenderContext.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DataStructures.hpp" />
+    <ClCompile Include="DirectionalShadowMap.cpp" />
     <ClCompile Include="FontFactory.cpp" />
     <ClCompile Include="GlobalShaderVars.cpp" />
     <ClCompile Include="Inputs.cpp" />
@@ -92,10 +93,12 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelRenderingContext.cpp" />
+    <ClCompile Include="PointShadowMap.cpp" />
     <ClCompile Include="RawPrimitive.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="rendering.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="SingleCallContext.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SVFont.cpp" />
@@ -105,6 +108,7 @@
     <ClInclude Include="BatchRenderContext.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="dataArrays.h" />
+    <ClInclude Include="DirectionalShadowMap.h" />
     <ClInclude Include="FontFactory.h" />
     <ClInclude Include="GlobalShaderVars.h" />
     <ClInclude Include="Inputs.h" />
@@ -112,10 +116,12 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelRenderingContext.h" />
+    <ClInclude Include="PointShadowMap.h" />
     <ClInclude Include="RawPrimitive.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="rendering.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="SingleCallContext.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SVFont.h" />

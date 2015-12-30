@@ -23,9 +23,4 @@ struct Texture {
 	GLint transparency;
 };
 
-struct ShadowMap{
-	GLuint shadowmapFBO;
-	GLuint shadowmapTexture;
-};
-
 #endif

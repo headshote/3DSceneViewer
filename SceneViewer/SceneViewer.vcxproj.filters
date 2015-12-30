@@ -53,7 +53,18 @@
     <ClCompile Include="SingleCallContext.cpp">
       <Filter>models</Filter>
     </ClCompile>
-    <ClCompile Include="BatchRenderContext.cpp" />
+    <ClCompile Include="BatchRenderContext.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>shadows</Filter>
+    </ClCompile>
+    <ClCompile Include="PointShadowMap.cpp">
+      <Filter>shadows</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalShadowMap.cpp">
+      <Filter>shadows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -107,7 +118,18 @@
     <ClInclude Include="SingleCallContext.h">
       <Filter>models</Filter>
     </ClInclude>
-    <ClInclude Include="BatchRenderContext.h" />
+    <ClInclude Include="BatchRenderContext.h">
+      <Filter>models</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>shadows</Filter>
+    </ClInclude>
+    <ClInclude Include="PointShadowMap.h">
+      <Filter>shadows</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalShadowMap.h">
+      <Filter>shadows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\batchNormalsVertex.glsl">
@@ -258,6 +280,9 @@
     </Filter>
     <Filter Include="models">
       <UniqueIdentifier>{ceb563b7-195a-494d-9d31-ca0ae8dc54fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shadows">
+      <UniqueIdentifier>{dfa7a3d2-28ed-44ab-b735-40f8addd3be9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

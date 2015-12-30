@@ -42,11 +42,15 @@
 #include "SingleCallContext.h"
 #include "BatchRenderContext.h"
 
+#include "DirectionalShadowMap.h"
+#include "PointShadowMap.h"
+
 using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;
 using namespace lighting;
 using namespace models;
+using namespace shadows;
 
 const GLint SCREEN_WIDTH = 1280;
 const GLint SCREEN_HEIGHT = 720;
@@ -376,121 +380,6 @@ void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightn
 	glEnable(GL_DEPTH_TEST);
 }
 
-ShadowMap generateDirShadowRBuffer()
-{
-	//frame buffer
-	GLuint depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO); 
-	
-	//depth buffer texture
-	GLuint depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-		SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-	//attach the texture to the frame buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-	//We only need the depth information when rendering the scene from the light's perspective 
-	//so there is no need for a color buffer. A framebuffer object however is not complete without a color buffer 
-	//so we need to explicitly tell OpenGL we're not going to render any color data. 
-	//We do this by setting both the read and draw buffer to GL_NONE
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	ShadowMap shadowmap;
-	shadowmap.shadowmapFBO = depthMapFBO;
-	shadowmap.shadowmapTexture = depthMap;
-	return shadowmap;
-}
-
-glm::mat4 setTransformationsForDirShadows(GLuint shadowMapShader, glm::vec3& lightPosition)
-{
-	glm::mat4 projection = glm::ortho(-75.0f, 75.0f, -75.0f, 75.0f, 0.1f, 83.5f);
-
-	glm::mat4 view = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(1.0f));
-
-	glm::mat4 lightSpaceMatrix = projection * view;
-
-	glUseProgram(shadowMapShader);
-	glUniformMatrix4fv(glGetUniformLocation(shadowMapShader, "lightSpaceMatrix"), 1,
-		GL_FALSE,	//transpose?
-		glm::value_ptr(lightSpaceMatrix));
-
-	return lightSpaceMatrix;
-}
-
-ShadowMap genPointShadowMap()
-{
-	//frame buffer
-	GLuint depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO);
-
-	GLuint depthCubemap;
-	glGenTextures(1, &depthCubemap);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-	for (GLuint i = 0; i < 6; ++i)
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
-		SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	//Normally we'd attach a single face of a cubemap texture to the framebuffer object and render the scene 6 times, 
-	//each time switching the depth buffer target of the framebuffer to a different cubemap face. 
-	//Since we're going to use a geometry shader that allows us to render to all faces in a single pass
-	//we can directly attach the cubemap as a framebuffer's depth attachment using glFramebufferTexture: 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	ShadowMap shadowmap;
-	shadowmap.shadowmapFBO = depthMapFBO;
-	shadowmap.shadowmapTexture = depthCubemap;
-	return shadowmap;
-}
-
-GLfloat setPointShadowTransforms(GLuint pointShadowMapShader, glm::vec3& lightPos)
-{
-	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
-	GLfloat near = 0.05f;
-	GLfloat far = 30.0f;
-	glm::mat4 shadowProj = glm::perspective(90.0f, aspect, near, far);
-
-	std::vector<glm::mat4> lightSpaceMatrices = {
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)),
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)),
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)),
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)),
-		shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0))
-	};
-
-	glUseProgram(pointShadowMapShader);
-	for (GLuint i = 0; i < lightSpaceMatrices.size(); i++)
-		glUniformMatrix4fv(glGetUniformLocation(pointShadowMapShader, (GLchar*)("lightSpaceTransforms[" + std::to_string(i) + "]").c_str()), 1,
-		GL_FALSE,	//transpose?
-		glm::value_ptr(lightSpaceMatrices[i]));
-	glUniform3f(glGetUniformLocation(pointShadowMapShader, "lightPosition"), lightPos.x, lightPos.y, lightPos.z);
-	glUniform1f(glGetUniformLocation(pointShadowMapShader, "far_plane"), far);
-
-	return far;
-}
-
 void renderGBufferData(GLuint deferredLghtShdr, GLuint* gBufferTextures, GLuint nTextures, GLuint quadVao, GLuint nQuadVertices)
 {
 	//activate the default buffer (screen buffer)
@@ -777,10 +666,10 @@ int main()
 		"textures/cubemap/mnight_bk.jpg", "textures/cubemap/mnight_ft.jpg" });
 
 	//create frame buffer to render the shadow map
-	ShadowMap directionalShadowmap = generateDirShadowRBuffer();
+	DirectionalShadowMap dirShadow(SHADOW_WIDTH, SHADOW_HEIGHT);
 
 	//buffer and cubetexture for point shadows
-	ShadowMap pointShadowmap = genPointShadowMap();
+	PointShadowMap pointShadow(SHADOW_WIDTH, SHADOW_HEIGHT);
 
 	//texts rendering
 	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT, "I never asked fo this");
@@ -1012,31 +901,13 @@ int main()
 		std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
 		ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
 		ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
-		
-		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glCullFace(GL_FRONT);
 
-		clearFrameBuffer(directionalShadowmap.shadowmapFBO);
+		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)		
+		dirShadow.renderShadowMap(shadowMapShader->getProgramId(), shadowMapBatchShader->getProgramId(), lights.getDirLight().direction * (-26.0f), models, modelContexts);
 
-		//Set all the space transformations for all the relvant shadow shaders
-		glm::mat4 lightSpaceMatrix = setTransformationsForDirShadows(shadowMapShader->getProgramId(), lights.getDirLight().direction * (-26.0f));
-		setTransformationsForDirShadows(shadowMapBatchShader->getProgramId(), lights.getDirLight().direction * (-26.0f));
-
-		renderCalls(shadowMapShader->getProgramId(), shadowMapBatchShader->getProgramId(), outlineShader->getProgramId(), 
-			outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, modelContexts, primitives, lights);
-
-		//render point shadow for the first point light (same viewport dimensions, as the directional, but the new frame buffer)
-		GLfloat pointLightFPlane = 0.0f;
+		//render point shadow for the first point light (same viewport dimensions, as the directional, but the new frame buffer)		
 		if (rendering::pointLightShadows)
-		{
-			clearFrameBuffer(pointShadowmap.shadowmapFBO);
-
-			pointLightFPlane = setPointShadowTransforms(pointShadowMapShader->getProgramId(), lights.getPointLight(0).position);
-			setPointShadowTransforms(pointShadowMapBatchShader->getProgramId(), lights.getPointLight(0).position);
-			renderCalls(pointShadowMapShader->getProgramId(), pointShadowMapBatchShader->getProgramId(), outlineShader->getProgramId(),
-				outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(), models, modelContexts, primitives, lights);
-		}		
+			pointShadow.renderShadowMap(pointShadowMapShader->getProgramId(), pointShadowMapBatchShader->getProgramId(), lights.getPointLight(0).position, models, modelContexts);			
 
 		//Lights
 		lights.setCameraDirection(theCamera->getCameraDirection());
@@ -1053,10 +924,10 @@ int main()
 		GlobalShaderVars::instance()->setMat4Var("projection", projection);
 		GlobalShaderVars::instance()->setMat4Var("view", view);
 		GlobalShaderVars::instance()->setMat4Var("pinnedView", glm::mat4(glm::mat3(view)));
-		GlobalShaderVars::instance()->setMat4Var("lightSpaceMatrix", lightSpaceMatrix);
-		GlobalShaderVars::instance()->setTextureVar("shadowMap", 16, GL_TEXTURE_2D, directionalShadowmap.shadowmapTexture);
-		GlobalShaderVars::instance()->setTextureVar("pointShadowMap", 17, GL_TEXTURE_CUBE_MAP, pointShadowmap.shadowmapTexture);
-		GlobalShaderVars::instance()->setFloatVar("pointLightFarPlane", pointLightFPlane);
+		GlobalShaderVars::instance()->setMat4Var("lightSpaceMatrix", dirShadow.getLightSpaceMatrix());
+		GlobalShaderVars::instance()->setTextureVar("shadowMap", 16, GL_TEXTURE_2D, dirShadow.getTextureID());
+		GlobalShaderVars::instance()->setTextureVar("pointShadowMap", 17, GL_TEXTURE_CUBE_MAP, pointShadow.getTextureID());
+		GlobalShaderVars::instance()->setFloatVar("pointLightFarPlane", pointShadow.getFarPLane());
 		GlobalShaderVars::instance()->setBoolVar("pointLightShadows", rendering::pointLightShadows);
 		GlobalShaderVars::instance()->setVec3Var("viewerPos", theCamera->getPosition());
 
