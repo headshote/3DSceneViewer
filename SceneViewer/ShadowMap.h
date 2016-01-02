@@ -17,7 +17,7 @@ namespace shadows
 	class ShadowMap
 	{
 	public:
-		~ShadowMap();
+		virtual ~ShadowMap();
 
 		void renderShadowMap(const GLuint shadowShader, const GLuint shadowBatchShader, const glm::vec3& lightSourcePosition,
 			std::vector<models::Model>& theModels, std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>>& modelContexts);
@@ -27,9 +27,6 @@ namespace shadows
 
 	protected:
 		ShadowMap(const GLuint width, const GLuint height);
-		//no copy assignement and construction
-		ShadowMap(const ShadowMap&);
-		ShadowMap& operator=(const ShadowMap&);
 
 		void clearFrameBuffer(const GLuint FBO);
 
@@ -44,6 +41,11 @@ namespace shadows
 		GLuint shadowmapTexture;
 
 		glm::mat4 lightSpaceMatrix;
+
+	private:
+		//no copy assignement and construction
+		ShadowMap(const ShadowMap&);
+		ShadowMap& operator=(const ShadowMap&);
 
 	};
 
