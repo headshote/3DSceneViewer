@@ -45,15 +45,18 @@
 #include "DirectionalShadowMap.h"
 #include "PointShadowMap.h"
 
+#include "MultisampledBlurFB.h"
+
 using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;
 using namespace lighting;
 using namespace models;
 using namespace shadows;
+using namespace framebuffers;
 
-const GLint SCREEN_WIDTH = 1280;
-const GLint SCREEN_HEIGHT = 720;
+const GLuint SCREEN_WIDTH = 1280;
+const GLuint SCREEN_HEIGHT = 720;
 
 const GLuint SHADOW_WIDTH = 1536;
 const GLuint SHADOW_HEIGHT = 1536;
@@ -172,212 +175,6 @@ void clearFrameBuffer(GLuint FBO)
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-/**
-	Create a frame buffer, basically a texture, that we're going to render our scene to.
-	Later we could map this texture to a single quad, the size of a whole screen and do some post-processing in shaders at sonic speeed.
-	Used as an actual output buffer, because you need to give shaders a non-multisampled texture for texelation (as in applying it to actual fragments).
-		colorBufferParams : true - for alpha-containing color texture. false - for 16bit precision float (usually, data storage)
-*/
-GLuint makeFrameBuffer(GLuint* colorBufferTextures, GLboolean* colorBufferParams, GLuint nColorBuffers, GLboolean colorOnly = false, GLboolean linearApprox = true)
-{
-	GLuint FBO;
-	glGenFramebuffers(1, &FBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-	//Store here the list of color attachments, that we'll use for this particular framebuffer
-	std::vector<GLuint> attachments;
-
-	//Texture attachment for the frame buffer
-	glGenTextures(nColorBuffers, colorBufferTextures);
-	for (GLuint i = 0; i < nColorBuffers; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, colorBufferTextures[i]);
-		if (colorBufferParams != NULL && colorBufferParams[i])	//alpha, texture storage
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-		else	//noalpha, data buffer basically
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, linearApprox ? GL_LINEAR : GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, linearApprox ? GL_LINEAR : GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBufferTextures[i], 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-	}
-
-	if (!colorOnly)
-	{
-		//renderbuffer object being attached (Usually used as a stencil, depth buffer)
-		GLuint RBO;
-		glGenRenderbuffers(1, &RBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-	}
-
-	//Give the list  of active color attachments for the current framebuffer
-	glDrawBuffers(attachments.size(), &attachments[0]);
-
-	//Correctness check
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		return 0;
-	}
-	
-	//Bind back to the default framebuffer.
-	//To make sure all rendering operations will have a visual impact on the main window 
-	//we need to make the default framebuffer active again by binding to 0
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	return FBO;
-}
-
-/**
-Create a frame buffer, basically a multisampled texture texture, that we're going to render our scene to.
-Later we could map this texture to a single quad, the size of a whole screen and do some post-processing in shaders at sonic speeed
-*/
-GLuint makeMultisampleFrameBuffer(GLuint* colorBufferTexture, GLuint nColorBuffers, GLuint samples = NUM_FRAGMENT_SAMPLES)
-{
-	GLuint FBO;
-	glGenFramebuffers(1, &FBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-	//Store here the list of color attachments, that we'll use for this particular framebuffer
-	std::vector<GLuint> attachments;
-
-	//Texture attachment for the frame buffer
-	glGenTextures(nColorBuffers, colorBufferTexture);
-	for (GLuint i = 0; i < nColorBuffers; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorBufferTexture[i]);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, GL_TRUE);
-		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, colorBufferTexture[i], 0);
-		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-	}
-
-	//renderbuffer object being attached (Usually used as a stencil, depth buffer)
-	GLuint RBO;
-	glGenRenderbuffers(1, &RBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-
-	glDrawBuffers(nColorBuffers, &attachments[0]);
-
-	//Correctness check
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cout << "ERROR::MULTISAMPLE_FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-		return 0;
-	}
-
-	//Bind back to the default framebuffer.
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	return FBO;
-}
-
-/**
-	Blits the colorbuffer from the multisampled FBO to the main FBO's color buffer (normal texture, that can be used for rendering)
-*/
-void blitMSampledScene(GLuint multisampleFBO, GLuint sceneFBO)
-{
-	//Blit the multisampled frame buffer (where we have rendered the scene), to a non-multisampled frame buffer,
-	//which texture will be mapped to a full-screen quad
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampleFBO);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sceneFBO);
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	glReadBuffer(GL_COLOR_ATTACHMENT1);
-	glDrawBuffer(GL_COLOR_ATTACHMENT1);
-	glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-}
-
-/**	
-	Using gauss blur, make multiple render calls, to render ping-pong buffers into a main fullscreen quad,
-	exchanging their color textures, and blurring the brigtness buffer texture of the main rendering buffer
-	Perfrom this before rendering the scene texture to the fullscreen quad
-*/
-void blurSceneBrightnessTextr(GLuint blurShader, GLuint brightnessTexture, GLuint quadVao, GLuint nQuadVertices, 
-	GLuint* pingpongFBOs, GLuint* pingpongTextrs)
-{
-	//Blur the brigtness texture (with gauss blur)
-	GLboolean horizontal = true, first_iteration = true;
-	GLuint amount = 10;
-	glUseProgram(blurShader);
-	for (GLuint i = 0; i < amount; i++)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBOs[horizontal]);
-
-		glUniform1i(glGetUniformLocation(blurShader, "horizontal"), horizontal);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, first_iteration ? brightnessTexture : pingpongTextrs[!horizontal]);
-
-		glBindVertexArray(quadVao);
-		glDrawArrays(GL_TRIANGLES, 0, nQuadVertices);
-
-		horizontal = !horizontal;
-		first_iteration = false;
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-/**
-Renders the contects of a frame buffer (given by it's buffer texture)
-into a quad (whose vertices are given as a parameter,
-and which is supposed to be in normalized device coordinates, taking full screen),
-using simple screen shader (no transforms
-*/
-void renderFrameBufferToQuad(GLuint shader, GLuint bufferTexture, GLuint brightnessTexture, GLuint quadVao, GLuint nQuadVertices)
-{
-	//activate the default buffer (screen buffer)
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glDisable(GL_DEPTH_TEST);
-
-	//So that polygon mode for the quad is always fill
-	GLint oldPolygonMode;
-	glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	//Render the quad with the frame buffer texture on it
-	glUseProgram(shader);
-	glUniform1f(glGetUniformLocation(shader, "exposure"), rendering::hdrExposure);
-
-	glUniform1i(glGetUniformLocation(shader, "screenTexture"), 0);
-	glUniform1i(glGetUniformLocation(shader, "brightnessTexture"), 1);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, bufferTexture);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, brightnessTexture);
-
-	glBindVertexArray(quadVao);
-	glDrawArrays(GL_TRIANGLES, 0, nQuadVertices);
-
-	//unbind objects
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//retrun to whatever polygon mode we used on the actual rendering
-	glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-	glEnable(GL_DEPTH_TEST);
 }
 
 void renderGBufferData(GLuint deferredLghtShdr, GLuint* gBufferTextures, GLuint nTextures, GLuint quadVao, GLuint nQuadVertices)
@@ -630,23 +427,12 @@ int main()
 	std::shared_ptr<Camera> theCamera(new Camera());
 
 	//Prepare frame buffer to render to
-	GLuint colorBufferTexture[2];
-	GLuint msColorBufferTexture[2];
-	//since we're using gamma correction, use the srgb format for the texture, to which the scene is rendered, and which is rendered in the final buffer,
-	//for which we enable gamma correction
-	GLuint sceneFBO = makeFrameBuffer(colorBufferTexture, NULL, sizeof(colorBufferTexture) / sizeof(GLuint));
-	GLuint multisampleFBO = makeMultisampleFrameBuffer(msColorBufferTexture, sizeof(msColorBufferTexture) / sizeof(GLuint));
-
-	//for Gauss blur, for the Bloom effect on the bright lights sources/lit areas
-	GLuint pingpongFBOs[2];
-	GLuint pingponTextures[2];
-	pingpongFBOs[0] = makeFrameBuffer(pingponTextures, NULL, 1, true);
-	pingpongFBOs[1] = makeFrameBuffer(pingponTextures + 1, NULL, 1, true);
+	MultisampledBlurFB msFBO(SCREEN_WIDTH, SCREEN_HEIGHT, NUM_FRAGMENT_SAMPLES);
 
 	//G-buffer, for deferred rendering
 	GLuint gBufferTextures[6];	//1. position, 2. normal, 3. tangent, 4. bitangent, 5. diffuse+spec, 6. lightSpacePosition
 	GLboolean gBufferTextrsParams[] = { false, false, false, false, true, true };
-	GLuint gBuffer = makeFrameBuffer(gBufferTextures, gBufferTextrsParams, sizeof(gBufferTextures) / sizeof(GLuint), false, false);
+	GLuint gBuffer = 0;// makeFrameBuffer(gBufferTextures, gBufferTextrsParams, sizeof(gBufferTextures) / sizeof(GLuint), false, false);
 
 	//This vao, contains the quad in NDC, which will have the FBO texture applied to it
 	RawPrimitive rq(dataArrays::quadVertices, sizeof(dataArrays::quadVertices));
@@ -941,7 +727,7 @@ int main()
 		{
 			blendingOn();
 
-			clearFrameBuffer(multisampleFBO);
+			msFBO.activateBuffer();
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
 				models, modelContexts, primitives, lights);
@@ -958,11 +744,7 @@ int main()
 				models, modelContexts, primitives, lights);
 
 			//Render the texture, containing the rendered scene to a full-screen quad
-			blitMSampledScene(multisampleFBO, sceneFBO);
-			blurSceneBrightnessTextr(gaussBlurShdr->getProgramId(), colorBufferTexture[1],
-				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat), pingpongFBOs, pingponTextures);
-			renderFrameBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), colorBufferTexture[0], pingponTextures[1],
-				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));
+			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad);
 		}		
 		else	//---G-BUFFER STUFF, deferred rendering, no anti-aliosing for you, slut
 		{
@@ -1010,18 +792,14 @@ int main()
 
 			GlobalShaderVars::instance()->updateAllVars();
 
-			clearFrameBuffer(multisampleFBO);
+			msFBO.activateBuffer();
 
 			renderCalls(mainShader, mainBatchShader, outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
 				models, modelContexts, primitives, lights);
 
 			skyBox.drawCall(skyBoxShader->getProgramId());
 
-			blitMSampledScene(multisampleFBO, sceneFBO);
-			blurSceneBrightnessTextr(gaussBlurShdr->getProgramId(), colorBufferTexture[1], 
-				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat), pingpongFBOs, pingponTextures);
-			renderFrameBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), colorBufferTexture[0], pingponTextures[1],
-				renderingMiniQuad, sizeof(dataArrays::cornerQuadVertices) / sizeof(GLfloat));
+			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad);
 
 			//Reverse rear-view calculations (rear-view)
 			theCamera->setPitch(theCamera->getPitch() - 180.0f);
@@ -1035,9 +813,6 @@ int main()
 	}
 
 	//When we're done with all framebuffer operations, do not forget to delete the framebuffer object
-	glDeleteFramebuffers(1, &sceneFBO);
-	glDeleteFramebuffers(1, &multisampleFBO);
-	glDeleteFramebuffers(sizeof(pingpongFBOs) / sizeof(GLuint), pingpongFBOs);
 	glDeleteFramebuffers(1, &gBuffer);
 
 	//As soon as we exit the game loop we would like to properly clean/delete all resources that were allocated

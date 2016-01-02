@@ -65,6 +65,12 @@
     <ClCompile Include="DirectionalShadowMap.cpp">
       <Filter>shadows</Filter>
     </ClCompile>
+    <ClCompile Include="FrameBuffer.cpp">
+      <Filter>framebuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="MultisampledBlurFB.cpp">
+      <Filter>framebuffers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -129,6 +135,12 @@
     </ClInclude>
     <ClInclude Include="DirectionalShadowMap.h">
       <Filter>shadows</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBuffer.h">
+      <Filter>framebuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="MultisampledBlurFB.h">
+      <Filter>framebuffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -283,6 +295,9 @@
     </Filter>
     <Filter Include="shadows">
       <UniqueIdentifier>{dfa7a3d2-28ed-44ab-b735-40f8addd3be9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framebuffers">
+      <UniqueIdentifier>{7abd75f1-db5f-47b9-ac0d-ecd69afe3145}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
