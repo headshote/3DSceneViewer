@@ -25,9 +25,9 @@ void FrameBuffer::activateBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void FrameBuffer::renderColorBufferToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint renderingQuad)
+void FrameBuffer::renderColorBufferToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad)
 {
-	renderToQuad(postProcessingShader, blurShader, renderingQuad);
+	renderToQuad(postProcessingShader, blurShader, fullScreenQuad, renderingQuad);
 }
 
 /**

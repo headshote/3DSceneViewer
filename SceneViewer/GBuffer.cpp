@@ -12,7 +12,7 @@ GBuffer::~GBuffer()
 {
 }
 
-void GBuffer::renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint renderingQuad)
+void GBuffer::renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad)
 {
 	//activate the default buffer (screen buffer)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

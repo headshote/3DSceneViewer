@@ -11,7 +11,7 @@ namespace framebuffers
 		~GBuffer();
 
 	protected:
-		virtual void renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint renderingQuad);
+		virtual void renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad);
 
 	private:
 		//no copy assignement and construction

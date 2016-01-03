@@ -73,11 +73,11 @@ MultisampledBlurFB::~MultisampledBlurFB()
 	glDeleteTextures(simpleColorBuffers.size(), &simpleColorBuffers[0]);
 }
 
-void MultisampledBlurFB::renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint renderingQuad)
+void MultisampledBlurFB::renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad)
 {
 	blitMSampledScene(theFBO, simpleFBO);
 
-	blurSceneBrightnessTextr(postProcessingShader, renderingQuad, simpleColorBuffers[1]);
+	blurSceneBrightnessTextr(postProcessingShader, fullScreenQuad, simpleColorBuffers[1]);
 
 	//activate the default buffer (screen buffer)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

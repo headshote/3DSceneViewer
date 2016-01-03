@@ -689,7 +689,7 @@ int main()
 				models, modelContexts, primitives, lights);
 
 			//Render the texture, containing the rendered scene to a full-screen quad
-			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad);
+			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad, renderingQuad);
 		}		
 		else	//---G-BUFFER STUFF, deferred rendering, no anti-aliosing for you, slut
 		{
@@ -705,7 +705,7 @@ int main()
 			//instead of for all the fragments for all the vertices in the screen
 			lights.setLightingParameters(theDeferredtingShader->getProgramId());
 
-			gBuff.renderColorBufferToQuad(theDeferredtingShader->getProgramId(), 0, renderingQuad);
+			gBuff.renderColorBufferToQuad(theDeferredtingShader->getProgramId(), 0, renderingQuad, renderingQuad);
 
 			//straightforward-render some things (skybox, in this case and text), will work because gBufer sets the depth of a default FBO properly,
 			//and the 3d objects can be drawn over of the screen quad as if they were drawn in a "real" 3d scene
@@ -739,7 +739,7 @@ int main()
 
 			skyBox.drawCall(skyBoxShader->getProgramId());
 
-			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingMiniQuad);
+			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad, renderingMiniQuad);
 
 			//Reverse rear-view calculations (rear-view)
 			theCamera->setPitch(theCamera->getPitch() - 180.0f);
