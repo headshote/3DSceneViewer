@@ -87,6 +87,7 @@
     <ClCompile Include="DirectionalShadowMap.cpp" />
     <ClCompile Include="FontFactory.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
+    <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="GlobalShaderVars.cpp" />
     <ClCompile Include="Inputs.cpp" />
     <ClCompile Include="LightingSystem.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="DirectionalShadowMap.h" />
     <ClInclude Include="FontFactory.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="GlobalShaderVars.h" />
     <ClInclude Include="Inputs.h" />
     <ClInclude Include="LightingSystem.h" />

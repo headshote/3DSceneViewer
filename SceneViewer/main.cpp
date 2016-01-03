@@ -46,6 +46,7 @@
 #include "PointShadowMap.h"
 
 #include "MultisampledBlurFB.h"
+#include "GBuffer.h"
 
 using namespace renderables;
 using namespace textandfonts;
@@ -164,56 +165,6 @@ void clearScreen()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-/**
-	Sets up current frame buffer for rendering calls and clears it
-*/
-void clearFrameBuffer(GLuint FBO)
-{
-	//Clear current buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-void renderGBufferData(GLuint deferredLghtShdr, GLuint* gBufferTextures, GLuint nTextures, GLuint quadVao, GLuint nQuadVertices)
-{
-	//activate the default buffer (screen buffer)
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glDisable(GL_DEPTH_TEST);
-
-	GLint oldPolygonMode;
-	glGetIntegerv(GL_POLYGON_MODE, &oldPolygonMode);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	//Render the quad with the frame buffer texture on it
-	glUseProgram(deferredLghtShdr);
-
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "gPosition"), 0);
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "gNormal"), 1);
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "gTangent"), 2);
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "gBitangent"), 3);
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "gAlbedoSpec"), 4);
-	glUniform1i(glGetUniformLocation(deferredLghtShdr, "glightSpacePosition"), 5);
-
-	for (GLuint i = 0; i < nTextures; i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, gBufferTextures[i]);
-	}
-
-	glBindVertexArray(quadVao);
-	glDrawArrays(GL_TRIANGLES, 0, nQuadVertices);
-
-	//unbind objects
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//retrun to whatever polygon mode we used on the actual rendering
-	glPolygonMode(GL_FRONT_AND_BACK, oldPolygonMode);
-	glEnable(GL_DEPTH_TEST);
 }
 
 /**
@@ -430,9 +381,7 @@ int main()
 	MultisampledBlurFB msFBO(SCREEN_WIDTH, SCREEN_HEIGHT, NUM_FRAGMENT_SAMPLES);
 
 	//G-buffer, for deferred rendering
-	GLuint gBufferTextures[6];	//1. position, 2. normal, 3. tangent, 4. bitangent, 5. diffuse+spec, 6. lightSpacePosition
-	GLboolean gBufferTextrsParams[] = { false, false, false, false, true, true };
-	GLuint gBuffer = 0;// makeFrameBuffer(gBufferTextures, gBufferTextrsParams, sizeof(gBufferTextures) / sizeof(GLuint), false, false);
+	GBuffer gBuff(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	//This vao, contains the quad in NDC, which will have the FBO texture applied to it
 	RawPrimitive rq(dataArrays::quadVertices, sizeof(dataArrays::quadVertices));
@@ -642,12 +591,12 @@ int main()
 		}
 		
 		//---continious actions
-		if (Inputs::instance()->isKeyHeld(GLFW_KEY_LEFT_BRACKET))
+		if (Inputs::instance()->isKeyPressed(GLFW_KEY_LEFT_BRACKET))
 		{
 			rendering::hdrExposure -= 0.25f;
 			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
 		}
-		if (Inputs::instance()->isKeyHeld(GLFW_KEY_RIGHT_BRACKET))
+		if (Inputs::instance()->isKeyPressed(GLFW_KEY_RIGHT_BRACKET))
 		{
 			rendering::hdrExposure += 0.25f;
 			std::cout << "hdr exposure: " << rendering::hdrExposure << std::endl;
@@ -751,7 +700,7 @@ int main()
 			blendingOff();
 
 			//activate gbuffer, fill it's textures with position, normals, color and lightspace data
-			clearFrameBuffer(gBuffer);
+			gBuff.activateBuffer();
 
 			renderCalls(thegBuffShader->getProgramId(), thegBuffBatchShader->getProgramId(), outlineShader->getProgramId(), outlineBatchShader->getProgramId(), lightSourceShader->getProgramId(),
 				models, modelContexts, primitives, lights);
@@ -761,17 +710,14 @@ int main()
 			lights.setLightingParameters(theDeferredtingShader->getProgramId());
 			if (rendering::explodeMode)
 				glUniform1f(glGetUniformLocation(theDeferredtingShader->getProgramId(), "time"), (GLfloat)currentTime);
-			renderGBufferData(theDeferredtingShader->getProgramId(), gBufferTextures, sizeof(gBufferTextures) / sizeof(GLuint),
-				renderingQuad, sizeof(dataArrays::quadVertices) / sizeof(GLfloat));
 
-			blendingOn();
-			//Blit the depth buffer from gBuffer to the default screen buffer, and straightforward-render some things (skybox, in this case)
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // Write to default framebuffer
-			glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			gBuff.renderColorBufferToQuad(theDeferredtingShader->getProgramId(), 0, renderingQuad);
 
+			//straightforward-render some things (skybox, in this case and text), will work because gBufer sets the depth of a default FBO properly,
+			//and the 3d objects can be drawn over of the screen quad as if they were drawn in a "real" 3d scene
 			//just set, don't clear of course, because there is a scene, recreated from the G-buffer texture on top of the full-screen quad now
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			blendingOn();
 			textField1->setText("I never asked for these " + std::to_string((GLuint)ceil(1.0 / deltaTime)) + " fps");
 			textField1->setPosition(20.0f, 680.0f);
 			textField1->drawCall(textShader->getProgramId());
@@ -811,9 +757,6 @@ int main()
 
 		Inputs::instance()->step(currentTime, deltaTime);
 	}
-
-	//When we're done with all framebuffer operations, do not forget to delete the framebuffer object
-	glDeleteFramebuffers(1, &gBuffer);
 
 	//As soon as we exit the game loop we would like to properly clean/delete all resources that were allocated
 	glfwTerminate();

@@ -71,6 +71,9 @@
     <ClCompile Include="MultisampledBlurFB.cpp">
       <Filter>framebuffers</Filter>
     </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>framebuffers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -140,6 +143,9 @@
       <Filter>framebuffers</Filter>
     </ClInclude>
     <ClInclude Include="MultisampledBlurFB.h">
+      <Filter>framebuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
       <Filter>framebuffers</Filter>
     </ClInclude>
   </ItemGroup>
