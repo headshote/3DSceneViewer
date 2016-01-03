@@ -418,6 +418,7 @@ int main()
 	GlobalShaderVars::instance()->addTextureVar("shadowMap");
 	GlobalShaderVars::instance()->addTextureVar("pointShadowMap");
 	GlobalShaderVars::instance()->addFloatVar("pointLightFarPlane");
+	GlobalShaderVars::instance()->addFloatVar("time"); 
 	GlobalShaderVars::instance()->addBoolVar("pointLightShadows");
 
 	GlobalShaderVars::instance()->addVec3Var("viewerPos");
@@ -430,6 +431,7 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "pointLightShadows");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "viewerPos");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnExplodeShader->getProgramId(), "time");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnShader->getProgramId(), "view");
@@ -456,6 +458,7 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointShadowMap");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "pointLightShadows");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchExplodeShader->getProgramId(), "time");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theBlinnBatchShader->getProgramId(), "view");
@@ -486,6 +489,7 @@ int main()
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightFarPlane");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "pointLightShadows");
 	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "viewerPos");
+	GlobalShaderVars::instance()->subscribeShaderToVar(theDeferredtingShader->getProgramId(), "time");
 
 	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "projection");
 	GlobalShaderVars::instance()->subscribeShaderToVar(skyBoxShader->getProgramId(), "pinnedView");
@@ -650,12 +654,6 @@ int main()
 		lights.setLightingParameters(mainShader);
 		lights.setLightingParameters(mainBatchShader);
 
-		if (rendering::explodeMode)
-		{
-			glUniform1f(glGetUniformLocation(mainShader, "time"), (GLfloat)currentTime);
-			glUniform1f(glGetUniformLocation(mainBatchShader, "time"), (GLfloat)currentTime);
-		}
-
 		GlobalShaderVars::instance()->setMat4Var("projection", projection);
 		GlobalShaderVars::instance()->setMat4Var("view", view);
 		GlobalShaderVars::instance()->setMat4Var("pinnedView", glm::mat4(glm::mat3(view)));
@@ -663,15 +661,13 @@ int main()
 		GlobalShaderVars::instance()->setTextureVar("shadowMap", 16, GL_TEXTURE_2D, dirShadow.getTextureID());
 		GlobalShaderVars::instance()->setTextureVar("pointShadowMap", 17, GL_TEXTURE_CUBE_MAP, pointShadow.getTextureID());
 		GlobalShaderVars::instance()->setFloatVar("pointLightFarPlane", pointShadow.getFarPLane());
+		GlobalShaderVars::instance()->setFloatVar("time", (GLfloat)currentTime);
 		GlobalShaderVars::instance()->setBoolVar("pointLightShadows", rendering::pointLightShadows);
 		GlobalShaderVars::instance()->setVec3Var("viewerPos", theCamera->getPosition());
 
 		GlobalShaderVars::instance()->updateAllVars();
 
-		//Render the scene to the frame buffer texture (normal rendering with lighting)
-		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-		glCullFace(GL_BACK);
-
+		//Render the scene to the frame buffer texture (normal rendering with lighting), and then the texture to the full screen quad
 		if (!rendering::deferredMode)	//straightforward rendering, isn't a pain in the ass to implement, and allows for anti-aliasing
 		{
 			blendingOn();
@@ -708,8 +704,6 @@ int main()
 			//render gbuffuer data to fullscreen quad, perform lighting/shadow calculations per-pixel, basically, 
 			//instead of for all the fragments for all the vertices in the screen
 			lights.setLightingParameters(theDeferredtingShader->getProgramId());
-			if (rendering::explodeMode)
-				glUniform1f(glGetUniformLocation(theDeferredtingShader->getProgramId(), "time"), (GLfloat)currentTime);
 
 			gBuff.renderColorBufferToQuad(theDeferredtingShader->getProgramId(), 0, renderingQuad);
 
@@ -745,7 +739,7 @@ int main()
 
 			skyBox.drawCall(skyBoxShader->getProgramId());
 
-			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingQuad);
+			msFBO.renderColorBufferToQuad(screenShaders[rendering::screenShaderId]->getProgramId(), gaussBlurShdr->getProgramId(), renderingMiniQuad);
 
 			//Reverse rear-view calculations (rear-view)
 			theCamera->setPitch(theCamera->getPitch() - 180.0f);

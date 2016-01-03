@@ -15,6 +15,9 @@ FrameBuffer::~FrameBuffer()
 
 void FrameBuffer::activateBuffer()
 {
+	glViewport(0, 0, scrWidth, scrHeight);
+	glCullFace(GL_BACK);
+
 	//Bind fbo as current
 	glBindFramebuffer(GL_FRAMEBUFFER, theFBO);
 	//Clear the current frame buffer
