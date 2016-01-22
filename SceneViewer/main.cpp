@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 
+#include <thread>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -170,10 +172,8 @@ void clearScreen()
 /**
 * List of the models to load at the beginning of the program should be in the scene file
 */
-std::vector<Model> loadModels()
+void loadModels(std::vector<Model>& models)
 {
-	std::vector<Model> models;
-
 	models.push_back(Model("models/nanosuit/nanosuit.obj"));
 	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
 	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
@@ -204,17 +204,13 @@ std::vector<Model> loadModels()
 		loadTexture("textures/woodbox/toy_box_normal.png"),
 		loadTexture("textures/woodbox/toy_box_disp.png") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
-
-	return models;
 }
 
 /**
 *	Later on, contexts should be created from a scene file, for now, the whole scene is hardcoded like this
 */
-std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> createContexts(std::vector<Model>& models)
+void createContexts(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
 {
-	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
-
 	for (GLuint i = 0; i < models.size(); ++i)
 		modelContexts[models[i].getID()] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 
@@ -290,8 +286,6 @@ std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> creat
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
 			currentMContexts[j]->applyContextStateToModel(model);
 	}
-
-	return modelContexts;
 }
 
 /**
@@ -321,6 +315,16 @@ void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, co
 	//Directional light "origin" far, far away
 	primitives[0].setTranslation(lights.getDirLight().direction * (-26.0f));
 	primitives[0].drawCall(lightSourceShader);
+}
+
+void scriptedMovements(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
+{
+	if (models.size() > 0)
+	{
+		std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
+		ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
+		ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
+	}
 }
 
 int main()
@@ -390,10 +394,12 @@ int main()
 	GLuint renderingMiniQuad = rmq.getVAO();
 
 	//Load the models
-	std::vector<Model> models = loadModels();
+	std::vector<Model> models;
+	loadModels(models);
 	
 	//LOad the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
-	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts = createContexts(models);
+	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
+	createContexts(models, modelContexts);
 	
 	//Cube map
 	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",
@@ -637,9 +643,7 @@ int main()
 		lights.setPointightPosition(1, glm::vec3(-(GLfloat)sin(currentTime * 0.9f) * 1.25f + 50.5f, 0.2f, 0.5f));
 
 		//make some models move around a bit
-		std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
-		ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
-		ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
+		scriptedMovements(models, modelContexts);
 
 		//Render the scene, and use depth buffer to create a shadowmap - a texture with info about objects in shadow (from directional light)		
 		dirShadow.renderShadowMap(shadowMapShader->getProgramId(), shadowMapBatchShader->getProgramId(), lights.getDirLight().direction * (-26.0f), models, modelContexts);
