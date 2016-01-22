@@ -170,43 +170,6 @@ void clearScreen()
 }
 
 /**
-* List of the models to load at the beginning of the program should be in the scene file
-*/
-void loadModels(std::vector<Model>& models)
-{
-	models.push_back(Model("models/nanosuit/nanosuit.obj"));
-	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
-	GLuint glassTexture[] = { loadTexture("textures/blending_transparent_window.png", false, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
-	models.push_back(Model("models/rock/rock.obj"));
-	models.push_back(Model("models/planet/planet.obj"));
-	//5
-	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::planeVertices, sizeof(dataArrays::planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint)), "floor1"));
-	//6
-	GLuint brickTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png"), loadTexture("textures/brickwall_normal.jpg") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint)), "brick1"));
-	//7
-	GLuint brickPlainTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint)), "brick2"));
-	//8
-	GLuint brickParallaxTexture[] = {
-		loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
-		loadTexture("textures/parallax_brix/specular.png"),
-		loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
-		loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint)), "brick3"));
-	//9
-	GLuint tbParallaxTexture[] = {
-		loadTexture("textures/woodbox/wood.png", false, false),
-		loadTexture("textures/woodbox/specular.png"),
-		loadTexture("textures/woodbox/toy_box_normal.png"),
-		loadTexture("textures/woodbox/toy_box_disp.png") };
-	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
-}
-
-/**
 *	Later on, contexts should be created from a scene file, for now, the whole scene is hardcoded like this
 */
 void createContexts(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
@@ -286,6 +249,45 @@ void createContexts(std::vector<Model>& models, std::map<std::string, std::vecto
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
 			currentMContexts[j]->applyContextStateToModel(model);
 	}
+}
+
+/**
+* List of the models to load at the beginning of the program should be in the scene file
+*/
+void loadModels(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
+{
+	models.push_back(Model("models/nanosuit/nanosuit.obj"));
+	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
+	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
+	GLuint glassTexture[] = { loadTexture("textures/blending_transparent_window.png", false, false), loadTexture("textures/mt_specular.png") };
+	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
+	models.push_back(Model("models/rock/rock.obj"));
+	models.push_back(Model("models/planet/planet.obj"));
+	//5
+	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
+	models.push_back(Model(new Mesh(dataArrays::planeVertices, sizeof(dataArrays::planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint)), "floor1"));
+	//6
+	GLuint brickTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png"), loadTexture("textures/brickwall_normal.jpg") };
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint)), "brick1"));
+	//7
+	GLuint brickPlainTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png") };
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint)), "brick2"));
+	//8
+	GLuint brickParallaxTexture[] = {
+		loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
+		loadTexture("textures/parallax_brix/specular.png"),
+		loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
+		loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint)), "brick3"));
+	//9
+	GLuint tbParallaxTexture[] = {
+		loadTexture("textures/woodbox/wood.png", false, false),
+		loadTexture("textures/woodbox/specular.png"),
+		loadTexture("textures/woodbox/toy_box_normal.png"),
+		loadTexture("textures/woodbox/toy_box_disp.png") };
+	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
+
+	createContexts(models, modelContexts);
 }
 
 /**
@@ -393,13 +395,10 @@ int main()
 	RawPrimitive rmq(dataArrays::cornerQuadVertices, sizeof(dataArrays::cornerQuadVertices));
 	GLuint renderingMiniQuad = rmq.getVAO();
 
-	//Load the models
-	std::vector<Model> models;
-	loadModels(models);
-	
-	//LOad the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
+	//Load the models and the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
 	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
-	createContexts(models, modelContexts);
+	std::vector<Model> models;
+	loadModels(models, modelContexts);
 	
 	//Cube map
 	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",
