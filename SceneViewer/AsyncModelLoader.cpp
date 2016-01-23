@@ -30,7 +30,9 @@ void AsyncModelLoader::loadModel(const std::string& filePath, std::vector<AsyncD
 /*static*/ void AsyncModelLoader::asyncLoadCall(const std::string& filePath, std::vector<AsyncData>* results)
 {
 	Assimp::Importer importer;
+
 	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+
 	results->push_back(AsyncData{
 		filePath,
 		scene

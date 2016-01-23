@@ -15,6 +15,7 @@
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
+#include "AsyncModelLoader.h"
 
 namespace models
 {
@@ -24,6 +25,7 @@ namespace models
 	{
 	public:
 		explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
+		explicit Model(AsyncData& modelData);
 		explicit Model(renderables::Renderable* renderable, const std::string id);
 		~Model();
 
@@ -75,6 +77,7 @@ namespace models
 		void updateTransformation();
 
 		void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
+		void loadModel(AsyncData& modelData);
 		void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
 		renderables::Mesh* createMesh(aiMesh* mesh, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);
 		std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);

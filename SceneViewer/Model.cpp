@@ -16,6 +16,13 @@ Model::Model(renderables::Renderable* renderable, const std::string id) : mId(id
 	initialize();
 }
 
+Model::Model(AsyncData& modelData)
+{
+	loadModel(modelData);
+
+	initialize();
+}
+
 Model::~Model()
 {
 }
@@ -296,6 +303,16 @@ void Model::loadModel(const std::string& filePath, const GLboolean useNormalMaps
 		return;
 	}
 	processNode(scene->mRootNode, scene, useNormalMaps, filePath.substr(0, filePath.find_last_of('/')));
+}
+
+
+void Model::loadModel(AsyncData& modelData)
+{
+	const aiScene* scene = modelData.scene;
+	std::string& filePath = modelData.filePath;
+
+	processNode(scene->mRootNode, scene, false, filePath.substr(0, filePath.find_last_of('/')));
+
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene, const GLboolean useNormalMaps, const std::string& modelRootDir)
