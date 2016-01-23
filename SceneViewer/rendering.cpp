@@ -19,4 +19,5 @@ namespace rendering
 	GLboolean deferredMode = false; 
 
 	GLuint screenShaderId = 0;
+
 }

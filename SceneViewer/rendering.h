@@ -24,7 +24,6 @@ namespace rendering
 	extern GLboolean deferredMode;
 
 	extern GLuint screenShaderId;
-
 }
 
 #endif	//RENDERING_H

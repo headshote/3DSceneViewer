@@ -66,17 +66,16 @@ const GLuint SHADOW_HEIGHT = 1536;
 
 const GLint NUM_FRAGMENT_SAMPLES = 4;
 
-GLFWwindow* setUpWindow(int width, int height)
+GLFWwindow* setUpWindow(int width, int height, GLFWwindow* threadWin)
 {
-	//instantiate the GLFW window
-	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
 
 	//Next we're required to create a window object.
-	GLFWwindow* window = glfwCreateWindow(width, height, "Scene Viewer", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Scene Viewer", nullptr, threadWin);
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -172,8 +171,11 @@ void clearScreen()
 /**
 *	Later on, contexts should be created from a scene file, for now, the whole scene is hardcoded like this
 */
-void createContexts(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
+void createContexts(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts)
 {
+	std::vector<Model>& models = *mdels;
+	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts = *mdelContexts;
+
 	for (GLuint i = 0; i < models.size(); ++i)
 		modelContexts[models[i].getID()] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 
@@ -254,8 +256,18 @@ void createContexts(std::vector<Model>& models, std::map<std::string, std::vecto
 /**
 * List of the models to load at the beginning of the program should be in the scene file
 */
-void loadModels(std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
+void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts, GLFWwindow* window)
 {
+	if (nullptr != window)
+	{
+		glfwMakeContextCurrent(window);
+		glewExperimental = GL_TRUE;
+		glewInit();
+	}
+
+	std::vector<Model>& models = *mdels;
+	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts = *mdelContexts;
+
 	models.push_back(Model("models/nanosuit/nanosuit.obj"));
 	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
 	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
@@ -287,7 +299,9 @@ void loadModels(std::vector<Model>& models, std::map<std::string, std::vector<st
 		loadTexture("textures/woodbox/toy_box_disp.png") };
 	models.push_back(Model(new Mesh(dataArrays::wallVertices, sizeof(dataArrays::wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
 
-	createContexts(models, modelContexts);
+	createContexts(mdels, mdelContexts);
+
+	glFlush();
 }
 
 /**
@@ -296,7 +310,7 @@ void loadModels(std::vector<Model>& models, std::map<std::string, std::vector<st
 void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader,
 	std::vector<Model>& models, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts, std::vector<Model>& primitives, LightingSystem& lights)
 {
-	//Rendering models
+	//Rendering models	
 	for (GLuint i = 0; i < models.size(); ++i)
 	{
 		Model& model = models[i];
@@ -305,7 +319,7 @@ void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, co
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
 			currentMContexts[j]->doRendering(model, shaderProgram, batchShaderProgram, outlineShader, outlineBatchShader);
-	}
+	}	
 
 	//Render lightsources (debug primitives at the places of point lights)
 	GLuint i = 0;
@@ -323,15 +337,25 @@ void scriptedMovements(std::vector<Model>& models, std::map<std::string, std::ve
 {
 	if (models.size() > 0)
 	{
-		std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
-		ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
-		ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
+		auto contextIter = modelContexts.find(models[0].getID());
+		if (contextIter != modelContexts.cend() && modelContexts[models[0].getID()].size() > 0)
+		{
+			std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
+			ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
+			ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
+		}
 	}
 }
 
 int main()
 {
-	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT);
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+	GLFWwindow* threadWin = glfwCreateWindow(1, 1, "Thread Window", NULL, NULL);
+	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT, threadWin);
 	if (window == nullptr)
 		return EXIT_FAILURE;
 
@@ -398,7 +422,9 @@ int main()
 	//Load the models and the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
 	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
 	std::vector<Model> models;
-	loadModels(models, modelContexts);
+	loadModels(&models, &modelContexts, nullptr);
+
+	//std::thread t1{ std::bind(loadModels, &models, &modelContexts, threadWin) };
 	
 	//Cube map
 	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",
