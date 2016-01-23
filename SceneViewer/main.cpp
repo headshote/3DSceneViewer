@@ -50,6 +50,8 @@
 #include "MultisampledBlurFB.h"
 #include "GBuffer.h"
 
+#include "AsyncModelLoader.h"
+
 using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;
@@ -256,7 +258,7 @@ void createContexts(std::vector<Model>* mdels, std::map<std::string, std::vector
 /**
 * List of the models to load at the beginning of the program should be in the scene file
 */
-void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts, GLFWwindow* window)
+void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts, std::vector<AsyncData>* modelQueue, GLFWwindow* window)
 {
 	if (nullptr != window)
 	{
@@ -267,6 +269,8 @@ void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std
 
 	std::vector<Model>& models = *mdels;
 	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts = *mdelContexts;
+
+	AsyncModelLoader::instance()->loadModel("models/nanosuit/nanosuit.obj", modelQueue);
 
 	models.push_back(Model("models/nanosuit/nanosuit.obj"));
 	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
@@ -350,12 +354,8 @@ void scriptedMovements(std::vector<Model>& models, std::map<std::string, std::ve
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-	GLFWwindow* threadWin = glfwCreateWindow(1, 1, "Thread Window", NULL, NULL);
-	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT, threadWin);
+
+	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
 	if (window == nullptr)
 		return EXIT_FAILURE;
 
@@ -422,9 +422,8 @@ int main()
 	//Load the models and the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
 	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
 	std::vector<Model> models;
-	loadModels(&models, &modelContexts, nullptr);
-
-	//std::thread t1{ std::bind(loadModels, &models, &modelContexts, threadWin) };
+	std::vector<AsyncData> modelQueue;
+	loadModels(&models, &modelContexts, &modelQueue, nullptr);
 	
 	//Cube map
 	SkyBox skyBox(std::vector<std::string> {"textures/cubemap/mnight_rt.jpg",  "textures/cubemap/mnight_lf.jpg",

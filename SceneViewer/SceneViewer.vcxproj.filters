@@ -74,6 +74,9 @@
     <ClCompile Include="GBuffer.cpp">
       <Filter>framebuffers</Filter>
     </ClCompile>
+    <ClCompile Include="AsyncModelLoader.cpp">
+      <Filter>models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -147,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="GBuffer.h">
       <Filter>framebuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncModelLoader.h">
+      <Filter>models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
