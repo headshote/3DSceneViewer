@@ -380,7 +380,6 @@ void checkLoadedModels(std::vector<Model>& models, std::vector<AsyncData>& model
 	{
 		AsyncData& vertexData = modelQueue[modelQueue.size()-1];
 		Model mdl1(vertexData);
-		models.push_back(mdl1);
 		modelQueue.pop_back();
 
 		//applies contexts to their models, because some context might have a lasting effect on the model's state
@@ -389,6 +388,8 @@ void checkLoadedModels(std::vector<Model>& models, std::vector<AsyncData>& model
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
 			currentMContexts[j]->applyContextStateToModel(mdl1);
+
+		models.push_back(mdl1);
 	}
 }
 
