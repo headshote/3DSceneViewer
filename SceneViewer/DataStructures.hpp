@@ -23,4 +23,9 @@ struct Texture {
 	GLint transparency;
 };
 
+struct TextureData{
+	std::string path;
+	std::string typeName;
+};
+
 #endif

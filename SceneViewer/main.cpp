@@ -276,12 +276,11 @@ void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std
 	}
 
 	std::vector<Model>& models = *mdels;
-	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts = *mdelContexts;
-
-	//AsyncModelLoader::instance()->loadModel("models/nanosuit/nanosuit.obj", modelQueue);
 
 	//0
-	models.push_back(Model("models/nanosuit/nanosuit.obj"));
+	std::string nanoPath = "models/nanosuit/nanosuit.obj";
+	AsyncModelLoader::instance()->loadModel(&nanoPath, modelQueue);
+	//models.push_back(Model("models/nanosuit/nanosuit.obj"));
 
 	//1
 	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
@@ -292,10 +291,12 @@ void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std
 	models.push_back(Model(new Mesh(dataArrays::transparentVertices, sizeof(dataArrays::transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
 
 	//3
-	models.push_back(Model("models/rock/rock.obj"));
+	std::string rockPath = "models/rock/rock.obj";
+	AsyncModelLoader::instance()->loadModel(&rockPath, modelQueue);
 
-	//4
-	models.push_back(Model("models/planet/planet.obj"));
+	////4
+	std::string planetPath = "models/planet/planet.obj";
+	AsyncModelLoader::instance()->loadModel(&planetPath, modelQueue);
 
 	//5
 	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
@@ -378,17 +379,17 @@ void checkLoadedModels(std::vector<Model>& models, std::vector<AsyncData>& model
 	for (GLuint i = 0; i < modelQueue.size();)
 	{
 		AsyncData vertexData = modelQueue[i];
-		Model mdl1(vertexData);
-		models.push_back(mdl1);
-		modelQueue.pop_back();
+		//Model mdl1(vertexData);
+		//models.push_back(mdl1);
+		//modelQueue.pop_back();
 
 		//applies contexts to their models, because some context might have a lasting effect on the model's state
 		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO
 		
-		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
+		/*std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->applyContextStateToModel(mdl1);
+			currentMContexts[j]->applyContextStateToModel(mdl1);*/
 	}
 }
 
@@ -598,7 +599,7 @@ int main()
 
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
-		checkLoadedModels(models, modelQueue, modelContexts);
+		//checkLoadedModels(models, modelQueue, modelContexts);
 
 		//----Inputs
 		//---One-time ations, right upon the key release

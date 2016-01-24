@@ -25,8 +25,8 @@ namespace models
 	{
 	public:
 		explicit Model(const GLchar* filePath, const GLboolean useNormalMaps = false);
-		explicit Model(AsyncData& modelData);
 		explicit Model(renderables::Renderable* renderable, const std::string id);
+		explicit Model(AsyncData& modelData);
 		~Model();
 
 		void setTranslation(const glm::vec3 translation);
