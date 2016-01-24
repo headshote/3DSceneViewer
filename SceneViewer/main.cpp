@@ -364,10 +364,10 @@ void scriptedMovements(std::vector<Model>& models, std::map<std::string, std::ve
 {
 	if (models.size() > 0)
 	{
-		auto contextIter = modelContexts.find(models[0].getID());
-		if (contextIter != modelContexts.cend() && modelContexts[models[0].getID()].size() > 0)
+		auto contextIter = modelContexts.find("models/nanosuit/nanosuit.obj");
+		if (contextIter != modelContexts.cend() && modelContexts["models/nanosuit/nanosuit.obj"].size() > 0)
 		{
-			std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts[models[0].getID()][0];
+			std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts["models/nanosuit/nanosuit.obj"][0];
 			ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
 			ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
 		}
