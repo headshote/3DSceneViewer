@@ -26,8 +26,8 @@ namespace models
 		std::vector<TextureData> diffuse;
 		std::vector<TextureData> specular;
 		std::vector<TextureData> normal;
-		std::vector<Vertex> vertices;
-		std::vector<GLuint> indices;
+		std::vector<std::vector<Vertex>> vertices;
+		std::vector<std::vector<GLuint>> indices;
 	};
 
 	class AsyncModelLoader
@@ -42,9 +42,9 @@ namespace models
 	private:
 		static std::shared_ptr<AsyncModelLoader> theInstance;
 
-		static void asyncLoadCall(const std::string* fPath, std::vector<AsyncData>* results);
+		void asyncLoadCall(const std::string* fPath, std::vector<AsyncData>* results);
 
-		static std::mutex mtx;
+		std::mutex mtx;
 
 		std::vector<std::thread> threads;
 

@@ -4,8 +4,6 @@ using namespace models;
 
 /*static*/ std::shared_ptr<AsyncModelLoader> AsyncModelLoader::theInstance;
 
-/*static*/ std::mutex AsyncModelLoader::mtx;
-
 /*static*/ std::shared_ptr<AsyncModelLoader> AsyncModelLoader::instance()
 {
 	if (!theInstance.get())
@@ -25,10 +23,10 @@ AsyncModelLoader::~AsyncModelLoader()
 
 void AsyncModelLoader::loadModel(const std::string* filePath, std::vector<AsyncData>* results)
 {
-	threads.push_back( std::thread{ std::bind(asyncLoadCall, filePath, results) } );
+	threads.push_back(std::thread{ std::bind(&AsyncModelLoader::asyncLoadCall, this, filePath, results) });
 }
 
-/*static*/ void AsyncModelLoader::asyncLoadCall(const std::string* fPath, std::vector<AsyncData>* results)
+void AsyncModelLoader::asyncLoadCall(const std::string* fPath, std::vector<AsyncData>* results)
 {
 	Assimp::Importer importer;
 
@@ -43,12 +41,13 @@ void AsyncModelLoader::loadModel(const std::string* filePath, std::vector<AsyncD
 
 	AsyncData meshData;
 	meshData.filePath = filePath;
+	meshData.vertices = *(new std::vector<std::vector<Vertex>>);
+	meshData.indices = *(new std::vector<std::vector<GLuint>>);
 
 	processNode(scene->mRootNode, scene, meshData, filePath.substr(0, filePath.find_last_of('/')));
 
-	//mtx.lock();
+	std::unique_lock<std::mutex> lck(mtx);
 	results->push_back(meshData);
-	//mtx.unlock();
 }
 
 void models::processNode(aiNode* node, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir)
@@ -136,8 +135,8 @@ void models::createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& meshData,
 		meshData.specular = specularMaps;
 	}
 
-	meshData.vertices = vertices;
-	meshData.indices = indices;
+	meshData.vertices.push_back( vertices);
+	meshData.indices.push_back(indices);
 }
 
 std::vector<TextureData>* models::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, AsyncData& meshData, const std::string& modelRootDir)
