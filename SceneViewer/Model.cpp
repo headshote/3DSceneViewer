@@ -304,7 +304,7 @@ void Model::loadModel(AsyncData& modelData)
 		{
 			TextureData& data = meshd.diffuse[i];
 
-			std::string textureNAme = data.path.substr(0, data.path.find("/"));
+			std::string textureNAme = data.path.substr(data.path.find_last_of("/") + 1, data.path.size());
 
 			Texture texture = obtainTexture(data.typeName, aiString(textureNAme), data.path);
 			textures.push_back(texture);
