@@ -219,7 +219,6 @@ void Mesh::loadVertices(const std::vector<Vertex>& vertices, const std::vector<G
 void Mesh::render(GLuint shaderprogram)
 {
 	setUpMaterial(shaderprogram);
-	///
 
 	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
 	glBindVertexArray(VAO);
@@ -231,6 +230,11 @@ void Mesh::render(GLuint shaderprogram)
 
 	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
 	glBindVertexArray(0);
+	for (GLuint i = 0; i < textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 /**
@@ -239,7 +243,7 @@ Using shaderProgram, and Vector Array Object, make OpenGL to render all our vert
 void Mesh::batchRender(GLuint shederprogram, GLuint numCalls)
 {
 	setUpMaterial(shederprogram);
-	///
+
 	GLboolean dotMode = rendering::dotMode;
 
 	GLenum rMode = dotMode ? GL_POINTS : GL_TRIANGLES;
@@ -252,6 +256,11 @@ void Mesh::batchRender(GLuint shederprogram, GLuint numCalls)
 
 	//It is common practice to unbind OpenGL objects when we're done configuring them so we don't mistakenly (mis)configure them elsewhere. 
 	glBindVertexArray(0);
+	for (GLuint i = 0; i < textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 /**

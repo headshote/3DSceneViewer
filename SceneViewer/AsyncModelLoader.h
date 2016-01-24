@@ -20,6 +20,11 @@
 
 namespace models
 {
+	struct TextureData{
+		std::string path;
+		std::string typeName;
+	};
+
 	struct MeshData{
 		std::vector<TextureData> diffuse;
 		std::vector<TextureData> specular;
