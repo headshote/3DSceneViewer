@@ -39,6 +39,8 @@ namespace models
 
 		void loadModel(const std::string* filePath, std::vector<AsyncData>* results);
 
+		GLboolean isDone();
+
 	private:
 		static std::shared_ptr<AsyncModelLoader> theInstance;
 
@@ -47,6 +49,7 @@ namespace models
 		std::mutex mtx;
 
 		std::vector<std::thread> threads;
+		std::vector<GLboolean> completedRequests;
 
 		AsyncModelLoader();
 	};

@@ -21,6 +21,11 @@ AsyncModelLoader::~AsyncModelLoader()
 		threads[i].join();
 }
 
+GLboolean AsyncModelLoader::isDone()
+{
+	return threads.size() == completedRequests.size();
+}
+
 void AsyncModelLoader::loadModel(const std::string* filePath, std::vector<AsyncData>* results)
 {
 	threads.push_back(std::thread{ std::bind(&AsyncModelLoader::asyncLoadCall, this, filePath, results) });
@@ -48,6 +53,7 @@ void AsyncModelLoader::asyncLoadCall(const std::string* fPath, std::vector<Async
 
 	std::unique_lock<std::mutex> lck(mtx);
 	results->push_back(meshData);
+	completedRequests.push_back(true);
 }
 
 void models::processNode(aiNode* node, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir)

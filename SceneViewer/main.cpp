@@ -376,20 +376,19 @@ void scriptedMovements(std::vector<Model>& models, std::map<std::string, std::ve
 
 void checkLoadedModels(std::vector<Model>& models, std::vector<AsyncData>& modelQueue, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts)
 {
-	for (GLuint i = 0; i < modelQueue.size();)
+	while (modelQueue.size() > 0)
 	{
-		AsyncData vertexData = modelQueue[i];
-		//Model mdl1(vertexData);
-		//models.push_back(mdl1);
-		//modelQueue.pop_back();
+		AsyncData& vertexData = modelQueue[modelQueue.size()-1];
+		Model mdl1(vertexData);
+		models.push_back(mdl1);
+		modelQueue.pop_back();
 
 		//applies contexts to their models, because some context might have a lasting effect on the model's state
-		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO
-		
-		/*std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
+		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
+		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
 
 		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->applyContextStateToModel(mdl1);*/
+			currentMContexts[j]->applyContextStateToModel(mdl1);
 	}
 }
 
@@ -599,7 +598,8 @@ int main()
 
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string( (GLuint)ceil(1.0 / deltaTime) ) + "]").c_str());
 
-		//checkLoadedModels(models, modelQueue, modelContexts);
+		if (AsyncModelLoader::instance()->isDone())
+			checkLoadedModels(models, modelQueue, modelContexts);
 
 		//----Inputs
 		//---One-time ations, right upon the key release
