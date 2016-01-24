@@ -290,7 +290,35 @@ void Model::setUniformMaxtrix(const GLuint shaderProgram, const GLchar* uniformN
 
 void Model::loadModel(AsyncData& modelData)
 {
-	
+	for (GLuint i = 0; i < modelData.meshes.size(); ++i)
+	{
+		MeshData& meshd = modelData.meshes[i];
+		std::vector<Vertex>& meshVertices = meshd.vertices;
+		std::vector<GLuint>& meshIndices = meshd.indices;
+
+		std::vector<Texture> textures;
+
+		for (GLuint i = 0; i < meshd.diffuse.size(); i++)
+		{
+			TextureData& data = meshd.diffuse[i];
+
+			std::string textureNAme = data.path.substr(0, data.path.find("/"));
+
+			Texture texture = obtainTexture(data.typeName, aiString(textureNAme), data.path);
+			textures.push_back(texture);
+		}
+		for (GLuint i = 0; i < meshd.specular.size(); i++)
+		{
+			TextureData& data = meshd.specular[i];
+
+			std::string textureNAme = data.path.substr(0, data.path.find("/"));
+
+			Texture texture = obtainTexture(data.typeName, aiString(textureNAme), data.path);
+			textures.push_back(texture);
+		}
+
+		meshes.push_back(std::shared_ptr<renderables::Mesh>(new renderables::Mesh(meshVertices, meshIndices, textures)));
+	}
 }
 
 /**
@@ -320,6 +348,8 @@ void Model::processNode(aiNode* node, const aiScene* scene, const GLboolean useN
 		//We thus want to retrieve these mesh indices, retrieve each mesh, process each mesh
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		meshes.push_back(std::shared_ptr<renderables::Renderable>(createMesh(mesh, scene, useNormalMaps, modelRootDir)));
+
+		//new renderables::Mesh(vertices, indices, textures);
 	}
 
 	// Then do the same for each of its children
@@ -416,33 +446,31 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		aiString textureName;
 
 		mat->GetTexture(type, i, &textureName);
-		GLboolean skip = false;
-		//First, check what's alredy loaded
-		for (GLuint j = 0; j < textures_loaded.size(); j++)
-		{
-			if (textures_loaded[j].name == textureName)
-			{
-				textures.push_back(textures_loaded[j]);
-				skip = true;
-				break;
-			}
-		}
-
-		//Only load the texture from file, if it hasn't been alredy
-		//Add it to cache after
-		if (!skip)
-		{   // If texture hasn't been loaded already, load it
-			Texture texture;
-			texture.id = loadTexture((modelRootDir + "/" + std::string(textureName.C_Str())).c_str()/*, false, typeName == "texture_diffuse"*/);
-			texture.type = typeName;
-			texture.name = textureName;
-			texture.transparency = 0;
-			textures.push_back(texture);
-			textures_loaded.push_back(texture);  // Add to loaded textures
-		}
+		Texture texture = obtainTexture(typeName, textureName, (modelRootDir + "/" + std::string(textureName.C_Str())));
+		textures.push_back(texture);
 	}
 
 	return textures;
+}
+
+Texture Model::obtainTexture(const std::string& typeName, aiString& textureName, const std::string& texturePath)
+{
+	//First, check what's alredy loaded
+	for (GLuint j = 0; j < textures_loaded.size(); j++)
+		if (textures_loaded[j].name == textureName)
+			return textures_loaded[j];
+
+	//Only load the texture from file, if it hasn't been alredy
+	//Add it to cache after
+	Texture texture;
+	texture.id = loadTexture(texturePath.c_str()/*, false, typeName == "texture_diffuse"*/);
+	texture.type = typeName;
+	texture.name = textureName;
+	texture.transparency = 0;
+	
+	textures_loaded.push_back(texture);  // Add to loaded textures	
+
+	return texture;
 }
 
 std::string Model::getID()

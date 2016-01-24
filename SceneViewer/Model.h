@@ -76,6 +76,8 @@ namespace models
 		void initialize();
 		void updateTransformation();
 
+		Texture obtainTexture(const std::string& typeName, aiString& textureName, const std::string& texturePath);
+
 		void loadModel(const std::string& filePath, const GLboolean useNormalMaps);
 		void loadModel(AsyncData& modelData);
 		void processNode(aiNode* node, const aiScene* scene, GLboolean useNormalMaps, const std::string& modelRootDir);

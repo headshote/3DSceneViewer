@@ -20,14 +20,18 @@
 
 namespace models
 {
-	struct AsyncData
-	{
-		std::string filePath;
+	struct MeshData{
 		std::vector<TextureData> diffuse;
 		std::vector<TextureData> specular;
 		std::vector<TextureData> normal;
-		std::vector<std::vector<Vertex>> vertices;
-		std::vector<std::vector<GLuint>> indices;
+		std::vector<Vertex> vertices;
+		std::vector<GLuint> indices;
+	};
+
+	struct AsyncData
+	{
+		std::string filePath;
+		std::vector<MeshData> meshes;
 	};
 
 	class AsyncModelLoader
@@ -54,7 +58,7 @@ namespace models
 		AsyncModelLoader();
 	};
 
-	void processNode(aiNode* node, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir);
-	void createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir);
-	std::vector<TextureData>* loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, AsyncData& meshData, const std::string& modelRootDir);
+	void processNode(aiNode* node, const aiScene* scene, AsyncData& modelhData, const std::string& modelRootDir);
+	void createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& modelhData, const std::string& modelRootDir);
+	std::vector<TextureData>* loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir);
 }

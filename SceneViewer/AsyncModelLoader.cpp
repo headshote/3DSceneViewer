@@ -44,19 +44,18 @@ void AsyncModelLoader::asyncLoadCall(const std::string* fPath, std::vector<Async
 		return;
 	}
 
-	AsyncData meshData;
-	meshData.filePath = filePath;
-	meshData.vertices = *(new std::vector<std::vector<Vertex>>);
-	meshData.indices = *(new std::vector<std::vector<GLuint>>);
+	AsyncData modelhData;
+	modelhData.filePath = filePath;
+	modelhData.meshes = *(new std::vector<MeshData>);
 
-	processNode(scene->mRootNode, scene, meshData, filePath.substr(0, filePath.find_last_of('/')));
+	processNode(scene->mRootNode, scene, modelhData, filePath.substr(0, filePath.find_last_of('/')));
 
 	std::unique_lock<std::mutex> lck(mtx);
-	results->push_back(meshData);
+	results->push_back(modelhData);
 	completedRequests.push_back(true);
 }
 
-void models::processNode(aiNode* node, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir)
+void models::processNode(aiNode* node, const aiScene* scene, AsyncData& modelhData, const std::string& modelRootDir)
 {
 	// Process all the node's meshes (if any)
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
@@ -66,17 +65,17 @@ void models::processNode(aiNode* node, const aiScene* scene, AsyncData& meshData
 		//We thus want to retrieve these mesh indices, retrieve each mesh, process each mesh
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-		createMesh(mesh, scene, meshData, modelRootDir);
+		createMesh(mesh, scene, modelhData, modelRootDir);
 	}
 
 	// Then do the same for each of its children
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, meshData, modelRootDir);
+		processNode(node->mChildren[i], scene, modelhData, modelRootDir);
 	}
 }
 
-void models::createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& meshData, const std::string& modelRootDir)
+void models::createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& modelhData, const std::string& modelRootDir)
 {
 	std::vector<Vertex>* vertics = new std::vector<Vertex>();
 	std::vector<GLuint>* indics = new std::vector<GLuint>;
@@ -130,22 +129,25 @@ void models::createMesh(aiMesh* mesh, const aiScene* scene, AsyncData& meshData,
 			indices.push_back(face.mIndices[j]);
 	}
 
+	MeshData meshData;
 	// Process materials, if they are present
 	if (mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<TextureData>& diffuseMaps = *loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", meshData, modelRootDir);
-		std::vector<TextureData>& specularMaps = *loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", meshData, modelRootDir);
+		std::vector<TextureData>& diffuseMaps = *loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", modelRootDir);
+		std::vector<TextureData>& specularMaps = *loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", modelRootDir);
 		meshData.diffuse = diffuseMaps;
 		meshData.specular = specularMaps;
 	}
 
-	meshData.vertices.push_back( vertices);
-	meshData.indices.push_back(indices);
+	meshData.vertices = vertices;
+	meshData.indices = indices;
+
+	modelhData.meshes.push_back(meshData);
 }
 
-std::vector<TextureData>* models::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, AsyncData& meshData, const std::string& modelRootDir)
+std::vector<TextureData>* models::loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& modelRootDir)
 {
 	std::vector<TextureData>* textures = new std::vector<TextureData>;
 
