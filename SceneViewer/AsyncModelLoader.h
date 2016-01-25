@@ -48,6 +48,12 @@ namespace models
 
 		void loadModel(const std::string* filePath, std::vector<AsyncData>* results);
 
+		/*
+		* With this method, you'll be able to join all the active threads, at convinient for you moment,
+		* before the results vector, used by them gets invalidated
+		*/
+		void join();
+
 		GLboolean isDone();
 
 	private:

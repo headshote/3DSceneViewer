@@ -825,6 +825,8 @@ int main()
 		Inputs::instance()->step(currentTime, deltaTime);
 	}
 
+	AsyncModelLoader::instance()->join();
+
 	//As soon as we exit the game loop we would like to properly clean/delete all resources that were allocated
 	glfwTerminate();
 

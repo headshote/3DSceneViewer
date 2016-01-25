@@ -17,8 +17,14 @@ AsyncModelLoader::AsyncModelLoader()
 
 AsyncModelLoader::~AsyncModelLoader()
 {
+	join();
+}
+
+void AsyncModelLoader::join()
+{
 	for (GLuint i = 0; i < threads.size(); ++i)
-		threads[i].join();
+		if(threads[i].joinable())
+			threads[i].join();
 }
 
 GLboolean AsyncModelLoader::isDone()
