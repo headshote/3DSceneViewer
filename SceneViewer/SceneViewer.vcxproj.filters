@@ -311,5 +311,8 @@
     <Filter Include="framebuffers">
       <UniqueIdentifier>{7abd75f1-db5f-47b9-ac0d-ecd69afe3145}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine">
+      <UniqueIdentifier>{9b2e6ed3-1942-439e-99bf-299c7329618c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

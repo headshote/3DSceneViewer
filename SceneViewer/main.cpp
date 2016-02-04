@@ -60,13 +60,13 @@ using namespace models;
 using namespace shadows;
 using namespace framebuffers;
 
-const GLuint SCREEN_WIDTH = 1280;
-const GLuint SCREEN_HEIGHT = 720;
+GLuint screenWidth = 1280;
+GLuint screenHeight = 720;
 
-const GLuint SHADOW_WIDTH = 1536;
-const GLuint SHADOW_HEIGHT = 1536;
+GLuint shadowViewWidth = 1536;
+GLuint shadowViewHeight = 1536;
 
-const GLint NUM_FRAGMENT_SAMPLES = 4;
+GLint nFragmentSamples = 4;
 
 GLFWwindow* setUpWindow(int width, int height, GLFWwindow* threadWin)
 {
@@ -128,7 +128,7 @@ void configureOpenGL()
 	glEnable(GL_PROGRAM_POINT_SIZE);  
 
 	//Anti-aliasing
-	//glfwWindowHint(GLFW_SAMPLES, NUM_FRAGMENT_SAMPLES);	//would have been useful, if we rendered directly to the window's default frame buffer
+	//glfwWindowHint(GLFW_SAMPLES, nFragmentSamples);	//would have been useful, if we rendered directly to the window's default frame buffer
 	glEnable(GL_MULTISAMPLE);
 }
 
@@ -397,7 +397,7 @@ int main()
 {
 	glfwInit();
 
-	GLFWwindow* window = setUpWindow(SCREEN_WIDTH, SCREEN_HEIGHT, nullptr);
+	GLFWwindow* window = setUpWindow(screenWidth, screenHeight, nullptr);
 	if (window == nullptr)
 		return EXIT_FAILURE;
 
@@ -450,10 +450,10 @@ int main()
 	std::shared_ptr<Camera> theCamera(new Camera());
 
 	//Prepare frame buffer to render to
-	MultisampledBlurFB msFBO(SCREEN_WIDTH, SCREEN_HEIGHT, NUM_FRAGMENT_SAMPLES);
+	MultisampledBlurFB msFBO(screenWidth, screenHeight, nFragmentSamples);
 
 	//G-buffer, for deferred rendering
-	GBuffer gBuff(SCREEN_WIDTH, SCREEN_HEIGHT);
+	GBuffer gBuff(screenWidth, screenHeight);
 
 	//This vao, contains the quad in NDC, which will have the FBO texture applied to it
 	RawPrimitive rq(dataArrays::quadVertices, sizeof(dataArrays::quadVertices));
@@ -473,13 +473,13 @@ int main()
 		"textures/cubemap/mnight_bk.jpg", "textures/cubemap/mnight_ft.jpg" });
 
 	//create frame buffer to render the shadow map
-	DirectionalShadowMap dirShadow(SHADOW_WIDTH, SHADOW_HEIGHT);
+	DirectionalShadowMap dirShadow(shadowViewWidth, shadowViewHeight);
 
 	//buffer and cubetexture for point shadows
-	PointShadowMap pointShadow(SHADOW_WIDTH, SHADOW_HEIGHT);
+	PointShadowMap pointShadow(shadowViewWidth, shadowViewHeight);
 
 	//texts rendering
-	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, SCREEN_WIDTH, SCREEN_HEIGHT, "I never asked fo this");
+	std::shared_ptr<TextField> textField1 = FontFactory::instance()->CreateRenderableText("fonts/arial.ttf", 32, screenWidth, screenHeight, "I never asked fo this");
 
 	//Shader vars, that are shared among many/most of the sahders are all registered here, and are updated for all the shaders in one call
 	GlobalShaderVars::instance()->addMat4Var("projection");
@@ -702,7 +702,7 @@ int main()
 
 		//Calculate transformation matrices for our 3d space
 		//projection matrix, perspective
-		glm::mat4 projection = glm::perspective(theCamera->fov, (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 500.0f);
+		glm::mat4 projection = glm::perspective(theCamera->fov, (GLfloat)screenWidth / (GLfloat)screenHeight, 0.1f, 500.0f);
 		//view(eye) matrix
 		theCamera->step(currentTime, deltaTime);
 		glm::mat4 view = theCamera->getView();
