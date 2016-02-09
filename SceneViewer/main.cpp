@@ -52,6 +52,8 @@
 
 #include "AsyncModelLoader.h"
 
+#include "REngine.h"
+
 using namespace renderables;
 using namespace textandfonts;
 using namespace shadervars;

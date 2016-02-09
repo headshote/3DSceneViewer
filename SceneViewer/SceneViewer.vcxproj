@@ -101,6 +101,7 @@
     <ClCompile Include="RawPrimitive.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="REngine.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="SingleCallContext.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="RawPrimitive.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="rendering.h" />
+    <ClInclude Include="REngine.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="SingleCallContext.h" />
