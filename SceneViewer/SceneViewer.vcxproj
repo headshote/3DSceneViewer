@@ -113,7 +113,6 @@
     <ClInclude Include="AsyncModelLoader.h" />
     <ClInclude Include="BatchRenderContext.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="dataArrays.h" />
     <ClInclude Include="DirectionalShadowMap.h" />
     <ClInclude Include="FontFactory.h" />
     <ClInclude Include="FrameBuffer.h" />

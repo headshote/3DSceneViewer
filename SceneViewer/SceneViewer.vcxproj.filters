@@ -100,9 +100,6 @@
     <ClInclude Include="Camera.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="dataArrays.h">
-      <Filter>data</Filter>
-    </ClInclude>
     <ClInclude Include="rendering.h">
       <Filter>rendering</Filter>
     </ClInclude>
@@ -292,9 +289,6 @@
     </Filter>
     <Filter Include="structs">
       <UniqueIdentifier>{1b7ffa72-c55e-44da-bf32-a85cbbfcca25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="data">
-      <UniqueIdentifier>{35d2d911-fb40-43ab-9de0-79d3d9e78306}</UniqueIdentifier>
     </Filter>
     <Filter Include="rendering">
       <UniqueIdentifier>{aea90366-ea56-42dc-9746-20bb096ab0b9}</UniqueIdentifier>
