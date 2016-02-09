@@ -1,5 +1,7 @@
 #pragma once
 
+#define GLEW_STATIC
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -8,6 +10,14 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include <SOIL/SOIL.h>
+#include <assimp/Importer.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 #include "rendering.h"
 #include "DataStructures.hpp"
@@ -148,6 +158,8 @@ namespace engine
 		std::shared_ptr<GBuffer> gBuff;
 
 		//because of post-processing
+		std::shared_ptr<RawPrimitive> rq;
+		std::shared_ptr<RawPrimitive> rmq;
 		GLuint renderingQuad;
 		GLuint renderingMiniQuad;
 

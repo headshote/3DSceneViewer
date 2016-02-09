@@ -178,10 +178,10 @@ REngine::REngine()
 	gBuff.reset(new GBuffer(screenWidth, screenHeight));
 
 	//This vao, contains the quad in NDC, which will have the FBO texture applied to it
-	RawPrimitive rq( quadVertices, sizeof( quadVertices));
-	renderingQuad = rq.getVAO();
-	RawPrimitive rmq( cornerQuadVertices, sizeof( cornerQuadVertices));
-	renderingMiniQuad = rmq.getVAO();
+	rq.reset(new RawPrimitive(quadVertices, sizeof(quadVertices)));
+	renderingQuad = rq->getVAO();
+	rmq.reset(new RawPrimitive( cornerQuadVertices, sizeof(cornerQuadVertices)));
+	renderingMiniQuad = rmq->getVAO();
 
 	//Load the models and the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
 	loadModels(&models, &modelContexts, &modelQueue, nullptr);
@@ -289,7 +289,6 @@ REngine::REngine()
 	//Lights
 	lights.reset(new LightingSystem());
 
-	std::vector<Model> primitives;
 	for (GLuint i = 0; i < lights->getNumPointLights(); i++)
 	{
 		Model primitive(new RawPrimitive( rectanglevertices, sizeof( rectanglevertices), lights->getPointLight(i).color), "lghtsrc" + i);
