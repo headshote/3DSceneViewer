@@ -27,6 +27,12 @@ Model::~Model()
 {
 }
 
+void Model::setRendMode(GLenum mode)
+{
+	for (GLuint i = 0; i < meshes.size(); i++)
+		meshes[i]->setRendMode(mode);
+}
+
 void Model::setTranslation(const glm::vec3 translation)
 {
 	mTranslation = translation;

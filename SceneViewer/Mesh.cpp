@@ -220,7 +220,6 @@ void Mesh::render(GLuint shaderprogram)
 {
 	setUpMaterial(shaderprogram);
 
-	GLenum rMode = rendering::dotMode ? GL_POINTS : GL_TRIANGLES;
 	glBindVertexArray(VAO);
 
 	if ( indexedMode )
@@ -244,9 +243,6 @@ void Mesh::batchRender(GLuint shederprogram, GLuint numCalls)
 {
 	setUpMaterial(shederprogram);
 
-	GLboolean dotMode = rendering::dotMode;
-
-	GLenum rMode = dotMode ? GL_POINTS : GL_TRIANGLES;
 	glBindVertexArray(VAO);
 
 	if (indexedMode)

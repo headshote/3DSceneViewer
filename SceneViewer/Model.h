@@ -39,6 +39,8 @@ namespace models
 		glm::vec3 getRotationAxis();
 		GLfloat getRotationAngle();
 
+		void setRendMode(GLenum mode);
+
 		void drawCall(const GLuint shaderProgram);
 		void drawOutlined(const GLuint renderShader, const GLuint outlineShader, const GLfloat outlineR = 0.43f, const GLfloat outlineG = 0.28f, const GLfloat outlineB = 0.06f);
 

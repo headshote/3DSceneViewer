@@ -4,7 +4,8 @@ using namespace framebuffers;
 
 MultisampledBlurFB::MultisampledBlurFB(GLuint scrWdht, GLuint scrHght, GLuint nSamples) : FrameBuffer(scrWdht, scrHght, std::vector<GLuint>(2)), 
 	pingPongFBOs(std::vector<GLuint>(2)),
-	pingPongTextures(std::vector<GLuint>(2)), simpleColorBuffers(std::vector<GLuint>(2))
+	pingPongTextures(std::vector<GLuint>(2)), simpleColorBuffers(std::vector<GLuint>(2)),
+	hdrExposure(1.0f)
 {
 	//Let's create multisampled fbo for anti-aliasing
 	GLuint FBO;
@@ -73,6 +74,11 @@ MultisampledBlurFB::~MultisampledBlurFB()
 	glDeleteTextures(simpleColorBuffers.size(), &simpleColorBuffers[0]);
 }
 
+void MultisampledBlurFB::setHDR(GLfloat exposure)
+{
+	hdrExposure = exposure;
+}
+
 void MultisampledBlurFB::renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad)
 {
 	blitMSampledScene(theFBO, simpleFBO);
@@ -91,7 +97,7 @@ void MultisampledBlurFB::renderToQuad(GLuint postProcessingShader, GLuint blurSh
 
 	//Render the quad with the frame buffer texture on it
 	glUseProgram(postProcessingShader);
-	glUniform1f(glGetUniformLocation(postProcessingShader, "exposure"), rendering::hdrExposure);
+	glUniform1f(glGetUniformLocation(postProcessingShader, "exposure"), hdrExposure);
 
 	glUniform1i(glGetUniformLocation(postProcessingShader, "screenTexture"), 0);
 	glUniform1i(glGetUniformLocation(postProcessingShader, "brightnessTexture"), 1);

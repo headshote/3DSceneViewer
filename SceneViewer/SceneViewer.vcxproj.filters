@@ -23,9 +23,6 @@
     <ClCompile Include="DataStructures.hpp">
       <Filter>structs</Filter>
     </ClCompile>
-    <ClCompile Include="rendering.cpp">
-      <Filter>rendering</Filter>
-    </ClCompile>
     <ClCompile Include="FontFactory.cpp">
       <Filter>textandfonts</Filter>
     </ClCompile>
@@ -99,9 +96,6 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="rendering.h">
-      <Filter>rendering</Filter>
     </ClInclude>
     <ClInclude Include="FontFactory.h">
       <Filter>textandfonts</Filter>
@@ -289,9 +283,6 @@
     </Filter>
     <Filter Include="structs">
       <UniqueIdentifier>{1b7ffa72-c55e-44da-bf32-a85cbbfcca25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="rendering">
-      <UniqueIdentifier>{aea90366-ea56-42dc-9746-20bb096ab0b9}</UniqueIdentifier>
     </Filter>
     <Filter Include="textandfonts">
       <UniqueIdentifier>{8dce4f63-d016-4d11-831b-54db4f7d30ea}</UniqueIdentifier>

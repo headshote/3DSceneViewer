@@ -9,7 +9,6 @@
 
 #include "Renderable.h"
 #include "DataStructures.hpp"
-#include "rendering.h"
 
 namespace renderables
 {

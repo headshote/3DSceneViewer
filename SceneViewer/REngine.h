@@ -18,8 +18,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
-#include "rendering.h"
 #include "DataStructures.hpp"
 
 #include "Shader.h"
@@ -148,6 +146,24 @@ namespace engine
 		//text rendering shader
 		std::shared_ptr<Shader> textShader;
 
+		//selection of shaders
+		GLuint screenShaderId;
+
+		GLfloat hdrExposure;
+
+		GLboolean renderNormals;
+
+		GLboolean explodeMode;
+
+		GLboolean rearView;
+
+		GLboolean highlightModels;
+
+		GLboolean dotMode;
+
+		//whether the first point light generates shadows
+		GLboolean pointLightShadows;
+
 		//camera
 		std::shared_ptr<Camera> theCamera;
 
@@ -156,6 +172,7 @@ namespace engine
 
 		//G-buffer, for deferred rendering
 		std::shared_ptr<GBuffer> gBuff;
+		GLboolean deferredMode;
 
 		//because of post-processing
 		std::shared_ptr<RawPrimitive> rq;

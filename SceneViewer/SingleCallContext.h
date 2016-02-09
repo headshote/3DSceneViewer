@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ModelRenderingContext.h"
-#include "rendering.h"
 
 namespace models
 {

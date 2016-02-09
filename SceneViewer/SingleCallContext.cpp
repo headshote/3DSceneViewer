@@ -27,8 +27,5 @@ void SingleCallContext::doRendering(Model& model, const GLuint shaderProgram, co
 	model.setScale(cScales[0]);
 	model.setRotation(cRotationAxes[0], cRotations[0]);
 
-	if (rendering::highlightModels)
-		model.drawOutlined(shaderProgram, outlineShader);
-	else
-		model.drawCall(shaderProgram);
+	model.drawCall(shaderProgram);
 }

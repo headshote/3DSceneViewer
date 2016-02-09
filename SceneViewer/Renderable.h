@@ -19,8 +19,12 @@ namespace renderables
 
 		void drawBatch(const GLuint shederprogram, const GLuint numDrawCalls);
 
+		void setRendMode(GLenum mode);
+
 	protected:
 		Renderable();
+
+		GLenum rMode;
 
 		virtual void render(const GLuint shaderprogram) = 0;
 		virtual void batchRender(const GLuint shaderProgram, const GLuint numCalls) = 0;

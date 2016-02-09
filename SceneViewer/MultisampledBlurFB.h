@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FrameBuffer.h"
-#include "rendering.h"
 
 namespace framebuffers
 {
@@ -11,6 +10,8 @@ namespace framebuffers
 		MultisampledBlurFB(GLuint scrWdht, GLuint scrHght, GLuint nSamples);
 
 		~MultisampledBlurFB();
+
+		void setHDR(GLfloat exposure);
 
 	protected:
 		virtual void renderToQuad(GLuint postProcessingShader, GLuint blurShader, GLuint fullScreenQuad, GLuint renderingQuad);
@@ -28,6 +29,8 @@ namespace framebuffers
 
 		GLuint simpleFBO;
 		std::vector<GLuint> simpleColorBuffers;
+
+		GLfloat hdrExposure;
 	};
 
 }

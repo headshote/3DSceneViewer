@@ -2,7 +2,7 @@
 
 using namespace renderables;
 
-Renderable::Renderable()
+Renderable::Renderable() : rMode(GL_TRIANGLES)
 {
 }
 
@@ -17,4 +17,9 @@ void Renderable::drawCall(const GLuint shederprogram)
 void Renderable::drawBatch(const GLuint shederprogram, const GLuint numDrawCalls)
 {
 	batchRender(shederprogram, numDrawCalls);
+}
+
+void Renderable::setRendMode(GLenum mode)
+{
+	rMode = mode;
 }
