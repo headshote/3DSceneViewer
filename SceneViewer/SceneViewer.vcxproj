@@ -60,7 +60,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimpd.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -72,12 +72,13 @@
       <SDLCheck>true</SDLCheck>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimpd.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;SOIL.lib;assimp.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -101,12 +102,14 @@
     <ClCompile Include="RawPrimitive.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="REngine.cpp" />
+    <ClCompile Include="SceneParser.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="SingleCallContext.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SVFont.cpp" />
     <ClCompile Include="TextField.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AsyncModelLoader.h" />
@@ -127,12 +130,14 @@
     <ClInclude Include="RawPrimitive.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="REngine.h" />
+    <ClInclude Include="SceneParser.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="SingleCallContext.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SVFont.h" />
     <ClInclude Include="TextField.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\batchNormalsVertex.glsl" />

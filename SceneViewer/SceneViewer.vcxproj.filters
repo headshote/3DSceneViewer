@@ -77,6 +77,10 @@
     <ClCompile Include="REngine.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="SceneParser.cpp" />
+    <ClCompile Include="utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.h">
@@ -150,6 +154,10 @@
     </ClInclude>
     <ClInclude Include="REngine.h">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneParser.h" />
+    <ClInclude Include="utils.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -304,6 +312,9 @@
     </Filter>
     <Filter Include="engine">
       <UniqueIdentifier>{9b2e6ed3-1942-439e-99bf-299c7329618c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scenes">
+      <UniqueIdentifier>{4be4eb73-4e39-4f8e-bfdc-b586bd6d9dbb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

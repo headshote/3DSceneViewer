@@ -577,91 +577,6 @@ REngine::~REngine()
 	glfwTerminate();
 }
 
-void REngine::blendingOn()
-{
-	//Blending, doesn't work with 'g-buffer'-type rendering (Deferred lighting/shading)
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
-}
-
-void REngine::blendingOff()
-{
-	glDisable(GL_BLEND);
-}
-
-/**
-Makes the default FBO currently active, and clears it
-*/
-void REngine::clearScreen()
-{
-	//Clear default buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-/**
-*	Rendering the scene, as defined by it's models and their contexts (reuse the loaded models, just transform them and render whatever amount of times during the main rendering loop iteration)
-*/
-void REngine::renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader)
-{
-	//Rendering models	
-	for (GLuint i = 0; i < models.size(); ++i)
-	{
-		Model& model = models[i];
-
-		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
-
-		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->doRendering(model, shaderProgram, batchShaderProgram, outlineShader, outlineBatchShader);
-	}
-
-	//Render lightsources (debug primitives at the places of point lights)
-	GLuint i = 0;
-	for (auto iterator = primitives.begin(); iterator != primitives.end(); i++, iterator++)
-	{
-		iterator->setTranslation(lights->getPointLight(i).position);
-		iterator->drawCall(lightSourceShader);
-	}
-	//Directional light "origin" far, far away
-	primitives[0].setTranslation(lights->getDirLight().direction * (-26.0f));
-	primitives[0].drawCall(lightSourceShader);
-}
-
-void REngine::scriptedMovements()
-{
-	if (models.size() > 0)
-	{
-		auto contextIter = modelContexts.find("models/nanosuit/nanosuit.obj");
-		if (contextIter != modelContexts.cend() && modelContexts["models/nanosuit/nanosuit.obj"].size() > 0)
-		{
-			std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts["models/nanosuit/nanosuit.obj"][0];
-			ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
-			ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
-		}
-	}
-}
-
-void REngine::checkLoadedModels()
-{
-	while (modelQueue.size() > 0)
-	{
-		AsyncData& vertexData = modelQueue[modelQueue.size() - 1];
-		Model mdl1(vertexData);
-		modelQueue.pop_back();
-
-		//applies contexts to their models, because some context might have a lasting effect on the model's state
-		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
-		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
-
-		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->applyContextStateToModel(mdl1);
-
-		models.push_back(mdl1);
-	}
-}
-
 void REngine::renderingLoop()
 {
 	while (!glfwWindowShouldClose(window))
@@ -909,5 +824,90 @@ void REngine::renderingLoop()
 		glfwSwapBuffers(window);
 
 		Inputs::instance()->step(currentTime, deltaTime);
+	}
+}
+
+void REngine::blendingOn()
+{
+	//Blending, doesn't work with 'g-buffer'-type rendering (Deferred lighting/shading)
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+}
+
+void REngine::blendingOff()
+{
+	glDisable(GL_BLEND);
+}
+
+/**
+Makes the default FBO currently active, and clears it
+*/
+void REngine::clearScreen()
+{
+	//Clear default buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/**
+*	Rendering the scene, as defined by it's models and their contexts (reuse the loaded models, just transform them and render whatever amount of times during the main rendering loop iteration)
+*/
+void REngine::renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader)
+{
+	//Rendering models	
+	for (GLuint i = 0; i < models.size(); ++i)
+	{
+		Model& model = models[i];
+
+		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
+
+		for (GLuint j = 0; j < currentMContexts.size(); ++j)
+			currentMContexts[j]->doRendering(model, shaderProgram, batchShaderProgram, outlineShader, outlineBatchShader);
+	}
+
+	//Render lightsources (debug primitives at the places of point lights)
+	GLuint i = 0;
+	for (auto iterator = primitives.begin(); iterator != primitives.end(); i++, iterator++)
+	{
+		iterator->setTranslation(lights->getPointLight(i).position);
+		iterator->drawCall(lightSourceShader);
+	}
+	//Directional light "origin" far, far away
+	primitives[0].setTranslation(lights->getDirLight().direction * (-26.0f));
+	primitives[0].drawCall(lightSourceShader);
+}
+
+void REngine::scriptedMovements()
+{
+	if (models.size() > 0)
+	{
+		auto contextIter = modelContexts.find("models/nanosuit/nanosuit.obj");
+		if (contextIter != modelContexts.cend() && modelContexts["models/nanosuit/nanosuit.obj"].size() > 0)
+		{
+			std::shared_ptr<ModelRenderingContext> ourHeroOurHero = modelContexts["models/nanosuit/nanosuit.obj"][0];
+			ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
+			ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
+		}
+	}
+}
+
+void REngine::checkLoadedModels()
+{
+	while (modelQueue.size() > 0)
+	{
+		AsyncData& vertexData = modelQueue[modelQueue.size() - 1];
+		Model mdl1(vertexData);
+		modelQueue.pop_back();
+
+		//applies contexts to their models, because some context might have a lasting effect on the model's state
+		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
+		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
+
+		for (GLuint j = 0; j < currentMContexts.size(); ++j)
+			currentMContexts[j]->applyContextStateToModel(mdl1);
+
+		models.push_back(mdl1);
 	}
 }

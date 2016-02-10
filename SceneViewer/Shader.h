@@ -3,13 +3,13 @@
 #define SHADER_H
 
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 
 #include <memory>
 
 #include <GL/glew.h> // Include glew to get all the required OpenGL headers
+
+#include "utils.h"
 
 class Shader
 {
@@ -33,7 +33,6 @@ private:
 	// The program ID
 	GLuint shaderProgram;
 
-	std::string* readFile(const GLchar* filePath);
 	GLuint compileShader(const GLchar** shaderSource, GLenum shaderType, const GLchar* shaderPath);
 };
 

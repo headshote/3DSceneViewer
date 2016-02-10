@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+using namespace utils;
+
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath)
 {	
 	GLuint vertex;
@@ -55,36 +57,6 @@ Shader::~Shader()
 GLuint Shader::getProgramId()
 {
 	return shaderProgram;
-}
-
-std::string* Shader::readFile(const GLchar* filePath)
-{
-	// 1. Retrieve the vertex/fragment source code from filePath
-	std::string* shaderCode = nullptr;
-	std::ifstream shaderFile;
-
-	// ensures ifstream objects can throw exceptions:
-	shaderFile.exceptions(std::ifstream::badbit);
-
-	try
-	{
-		std::stringstream shaderStream;
-
-		// Open file
-		shaderFile.open(filePath);
-		// Read file's buffer contents into streams
-		shaderStream << shaderFile.rdbuf();
-		// close file handlers
-		shaderFile.close();
-		// Convert stream into GLchar array
-		shaderCode = new std::string( shaderStream.str() );
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-	}
-
-	return shaderCode;
 }
 
 GLuint Shader::compileShader(const GLchar** shaderSource, GLenum shaderType, const GLchar* shaderPath)
