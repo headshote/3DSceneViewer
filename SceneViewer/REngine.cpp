@@ -24,15 +24,6 @@ static GLfloat rectanglevertices[] = {
 	-0.5f, -0.5f, 0.0f,
 	-0.5f, 0.5f, 0.0f
 };
-static GLfloat transparentVertices[] = {
-	// Positions		//Normals					// Texture Coords (swapped y coordinates because texture is flipped upside down)
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-};
 
 //Quad, which will be used to display the texture, to which the scene is rendered
 static GLfloat quadVertices[] = {
@@ -100,27 +91,6 @@ static GLfloat cubeWithNormals[] = {
 	0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
 	-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f
-};
-
-static GLfloat planeVertices[] = {
-	// Positions			 // Normals         // Texture Coords
-	60.0f, -0.5f, 60.0f, 0.0f, 1.0f, 0.0f, 50.0f, 0.0f,
-	-60.0f, -0.5f, 60.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-	-60.0f, -0.5f, -60.0f, 0.0f, 1.0f, 0.0f, 0.0f, 50.0f,
-
-	60.0f, -0.5f, 60.0f, 0.0f, 1.0f, 0.0f, 50.0f, 0.0f,
-	-60.0f, -0.5f, -60.0f, 0.0f, 1.0f, 0.0f, 0.0f, 50.0f,
-	60.0f, -0.5f, -60.0f, 0.0f, 1.0f, 0.0f, 50.0f, 50.0f
-};
-
-static GLfloat wallVertices[] = {
-	// Positions		// Normals			// Texture Coords 
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-	1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-	1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
 };
 
 
@@ -209,166 +179,6 @@ void engine::printInfo()
 	std::cout << vec.x << " " << vec.y << " " << vec.z << " " << std::endl;
 }
 
-/**
-*	Later on, contexts should be created from a scene file, for now, the whole scene is hardcoded like this
-*/
-void engine::createContexts(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts)
-{
-	std::vector<Model>& models = *mdels;
-	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>& modelContexts = *mdelContexts;
-
-	modelContexts["models/nanosuit/nanosuit.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["grass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["glass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["models/rock/rock.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["models/planet/planet.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["floor1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick2"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick3"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["wood1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-
-	std::vector<glm::vec3> translations;
-	std::vector<glm::vec3> scales(25 + 45 + 70, glm::vec3(0.33f));;
-	std::vector<glm::vec3> rotationAxes;
-	std::vector<GLfloat> rotationAngles;
-	for (GLuint i = 0; i < 25; i++)
-	{
-		translations.push_back(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	for (GLuint i = 0; i < 45; i++)
-	{
-		translations.push_back(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	for (GLuint i = 0; i < 70; i++)
-	{
-		translations.push_back(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	modelContexts["models/nanosuit/nanosuit.obj"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(1.0f, 0.0f, -2.0f), glm::vec3(0.33f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f)));
-	modelContexts["models/nanosuit/nanosuit.obj"].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
-	std::vector<glm::vec3>().swap(translations);
-	std::vector<glm::vec3>(25, glm::vec3(1.0f)).swap(scales);
-	std::vector<glm::vec3>().swap(rotationAxes);
-	std::vector<GLfloat>().swap(rotationAngles);
-	for (GLuint i = 0; i < 25; i++)
-	{
-		translations.push_back(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
-		rotationAngles.push_back(30.0f + 45.0f * i);
-	}
-	modelContexts["models/rock/rock.obj"].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
-	std::vector<glm::vec3>().swap(translations);
-	std::vector<glm::vec3>(5, glm::vec3(1.0f)).swap(scales);
-	std::vector<glm::vec3>().swap(rotationAxes);
-	std::vector<GLfloat>().swap(rotationAngles);
-	for (GLuint i = 0; i < 5; i++)
-	{
-		translations.push_back(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	modelContexts["models/planet/planet.obj"].push_back(std::shared_ptr<ModelRenderingContext>(new BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
-	modelContexts["grass1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["glass1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["floor1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["brick1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["brick1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(0.0f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
-	modelContexts["brick2"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["brick2"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
-	modelContexts["brick3"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["brick3"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-1.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
-	modelContexts["wood1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-2.1f, 0.5f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
-	modelContexts["wood1"].push_back(std::shared_ptr<ModelRenderingContext>(new SingleCallContext(glm::vec3(-2.1f, 0.0f, 0.52f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), -90.0f, false)));
-
-	//applies contexts to their models, because some context might have a lasting effect on the model's state
-	//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO
-	for (GLuint i = 0; i < models.size(); ++i)
-	{
-		Model& model = models[i];
-
-		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
-
-		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->applyContextStateToModel(model);
-	}
-}
-
-/**
-* List of the models to load at the beginning of the program should be in the scene file
-*/
-void engine::loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts, std::vector<AsyncData>* modelQueue, GLFWwindow* window)
-{
-	if (nullptr != window)
-	{
-		glfwMakeContextCurrent(window);
-		glewExperimental = GL_TRUE;
-		glewInit();
-	}
-
-	std::vector<Model>& models = *mdels;
-
-	//0
-	std::string nanoPath = "models/nanosuit/nanosuit.obj";
-	AsyncModelLoader::instance()->loadModel(&nanoPath, modelQueue);
-	//models.push_back(Model("models/nanosuit/nanosuit.obj"));
-
-	//1
-	GLuint grassTexture[] = { loadTexture("textures/grass.png", true, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(transparentVertices, sizeof(transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
-
-	//2
-	GLuint glassTexture[] = { loadTexture("textures/blending_transparent_window.png", false, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(transparentVertices, sizeof(transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
-
-	//3
-	std::string rockPath = "models/rock/rock.obj";
-	AsyncModelLoader::instance()->loadModel(&rockPath, modelQueue);
-
-	////4
-	std::string planetPath = "models/planet/planet.obj";
-	AsyncModelLoader::instance()->loadModel(&planetPath, modelQueue);
-
-	//5
-	GLuint metalTexture[] = { loadTexture("textures/metal1.jpg", false, false), loadTexture("textures/metal1_specular.png") };
-	models.push_back(Model(new Mesh(planeVertices, sizeof(planeVertices), metalTexture, sizeof(metalTexture) / sizeof(GLuint)), "floor1"));
-
-	//6
-	GLuint brickTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png"), loadTexture("textures/brickwall_normal.jpg") };
-	models.push_back(Model(new Mesh(wallVertices, sizeof(wallVertices), brickTexture, sizeof(brickTexture) / sizeof(GLuint)), "brick1"));
-
-	//7
-	GLuint brickPlainTexture[] = { loadTexture("textures/brickwall.jpg", false, false), loadTexture("textures/mt_specular.png") };
-	models.push_back(Model(new Mesh(wallVertices, sizeof(wallVertices), brickPlainTexture, sizeof(brickPlainTexture) / sizeof(GLuint)), "brick2"));
-
-	//8
-	GLuint brickParallaxTexture[] = {
-		loadTexture("textures/parallax_brix/bricks2.jpg", false, false),
-		loadTexture("textures/parallax_brix/specular.png"),
-		loadTexture("textures/parallax_brix/bricks2_normal.jpg"),
-		loadTexture("textures/parallax_brix/bricks2_disp.jpg") };
-	models.push_back(Model(new Mesh(wallVertices, sizeof(wallVertices), brickParallaxTexture, sizeof(brickParallaxTexture) / sizeof(GLuint)), "brick3"));
-
-	//9
-	GLuint tbParallaxTexture[] = {
-		loadTexture("textures/woodbox/wood.png", false, false),
-		loadTexture("textures/woodbox/specular.png"),
-		loadTexture("textures/woodbox/toy_box_normal.png"),
-		loadTexture("textures/woodbox/toy_box_disp.png") };
-	models.push_back(Model(new Mesh(wallVertices, sizeof(wallVertices), tbParallaxTexture, sizeof(tbParallaxTexture) / sizeof(GLuint)), "wood1"));
-
-	createContexts(mdels, mdelContexts);
-
-	glFlush();
-}
 
 
 
@@ -462,7 +272,7 @@ REngine::REngine()
 	renderingMiniQuad = rmq->getVAO();
 
 	//Load the models and the contexts for the models (because the same model can be rendered multiple times with different transforms during the frame)
-	loadModels(&models, &modelContexts, &modelQueue, nullptr);
+	//loadModels(&models, &modelContexts, &modelQueue, nullptr);
 
 	//Cube map
 	skyBox.reset(new SkyBox(std::vector<std::string>{ "textures/cubemap/mnight_rt.jpg", "textures/cubemap/mnight_lf.jpg",

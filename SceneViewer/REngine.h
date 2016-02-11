@@ -56,9 +56,6 @@ namespace engine
 	GLFWwindow* setUpWindow(int width, int height, GLFWwindow* threadWin);
 	void configureOpenGL();
 	void printInfo();
-	void createContexts();
-	void createContexts(std::vector<models::Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>>* mdelContexts);
-	void loadModels(std::vector<models::Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>>* mdelContexts, std::vector<models::AsyncData>* modelQueue, GLFWwindow* window);
 
 	//The engine class
 	class REngine
