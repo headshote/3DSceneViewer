@@ -2,6 +2,14 @@
 
 using namespace engine;
 
+using namespace renderables;
+using namespace textandfonts;
+using namespace shadervars;
+using namespace lighting;
+using namespace models;
+using namespace shadows;
+using namespace framebuffers;
+
 
 //-------------------Handy numbers, hardcoded verices, primitives, coordinates, for testing purposes-----------------//
 
@@ -577,9 +585,9 @@ REngine::~REngine()
 	glfwTerminate();
 }
 
-void REngine::renderingLoop()
+GLboolean REngine::renderingLoop()
 {
-	while (!glfwWindowShouldClose(window))
+	if (!glfwWindowShouldClose(window))
 	{
 		//Time calculations
 		GLdouble currentTime = glfwGetTime();
@@ -824,7 +832,37 @@ void REngine::renderingLoop()
 		glfwSwapBuffers(window);
 
 		Inputs::instance()->step(currentTime, deltaTime);
+
+		return true;
 	}
+	return false;
+}
+
+void REngine::addContextsForModel(const std::string& modelId, std::vector<std::shared_ptr<ModelRenderingContext>>& contexts)
+{
+	modelContexts[modelId].insert(modelContexts[modelId].cend(), contexts.cbegin(), contexts.cend());
+
+	Model* mdl1 = nullptr;
+	for (GLuint i = 0; i < models.size(); ++i)
+		if (models[i].getID() == modelId)
+			mdl1 = &models[i];
+	
+	//applies contexts to their models, because some context might have a lasting effect on the model's state
+	//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO	
+	for (GLuint j = 0; nullptr != mdl1 && j < contexts.size(); ++j)
+		contexts[j]->applyContextStateToModel(*mdl1);
+}
+
+void REngine::addModel(Model& model)
+{
+	models.push_back(model);
+
+	//applies contexts to their models, because some context might have a lasting effect on the model's state
+	//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
+	std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
+
+	for (GLuint j = 0; j < currentMContexts.size(); ++j)
+		currentMContexts[j]->applyContextStateToModel(model);
 }
 
 void REngine::blendingOn()

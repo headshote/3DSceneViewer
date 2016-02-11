@@ -50,14 +50,6 @@
 
 #include "AsyncModelLoader.h"
 
-using namespace renderables;
-using namespace textandfonts;
-using namespace shadervars;
-using namespace lighting;
-using namespace models;
-using namespace shadows;
-using namespace framebuffers;
-
 namespace engine
 {
 	//Initialisation methods
@@ -65,8 +57,8 @@ namespace engine
 	void configureOpenGL();
 	void printInfo();
 	void createContexts();
-	void createContexts(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts);
-	void loadModels(std::vector<Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>>* mdelContexts, std::vector<AsyncData>* modelQueue, GLFWwindow* window);
+	void createContexts(std::vector<models::Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>>* mdelContexts);
+	void loadModels(std::vector<models::Model>* mdels, std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>>* mdelContexts, std::vector<models::AsyncData>* modelQueue, GLFWwindow* window);
 
 	//The engine class
 	class REngine
@@ -75,7 +67,10 @@ namespace engine
 		REngine();
 		~REngine();
 
-		void renderingLoop();
+		GLboolean renderingLoop();
+
+		void addContextsForModel(const std::string& modelId, std::vector<std::shared_ptr<models::ModelRenderingContext>>& contexts);
+		void addModel(models::Model& model);
 
 	private:
 		///Everyframe methods
@@ -85,7 +80,6 @@ namespace engine
 		void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader);
 		void scriptedMovements();
 		void checkLoadedModels();
-
 
 		//viewPort dimesnsions
 		GLuint screenWidth = 1280;
@@ -101,11 +95,11 @@ namespace engine
 		GLFWwindow* window;
 
 		//Model data
-		std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
-		std::vector<Model> models;
-		std::vector<AsyncData> modelQueue;
+		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> modelContexts;
+		std::vector<models::Model> models;
+		std::vector<models::AsyncData> modelQueue;
 
-		std::shared_ptr<SkyBox> skyBox;
+		std::shared_ptr<renderables::SkyBox> skyBox;
 
 		//Scene shaders
 		std::shared_ptr<Shader> theBlinnShader;
@@ -168,27 +162,27 @@ namespace engine
 		std::shared_ptr<Camera> theCamera;
 
 		//Frame buffer to render to
-		std::shared_ptr<MultisampledBlurFB >msFBO;
+		std::shared_ptr<framebuffers::MultisampledBlurFB> msFBO;
 
 		//G-buffer, for deferred rendering
-		std::shared_ptr<GBuffer> gBuff;
+		std::shared_ptr<framebuffers::GBuffer> gBuff;
 		GLboolean deferredMode;
 
 		//because of post-processing
-		std::shared_ptr<RawPrimitive> rq;
-		std::shared_ptr<RawPrimitive> rmq;
+		std::shared_ptr<renderables::RawPrimitive> rq;
+		std::shared_ptr<renderables::RawPrimitive> rmq;
 		GLuint renderingQuad;
 		GLuint renderingMiniQuad;
 
 		//shadows
-		std::shared_ptr<DirectionalShadowMap> dirShadow;
-		std::shared_ptr<PointShadowMap> pointShadow;
+		std::shared_ptr<shadows::DirectionalShadowMap> dirShadow;
+		std::shared_ptr<shadows::PointShadowMap> pointShadow;
 
-		std::shared_ptr<TextField> textField1;
+		std::shared_ptr<renderables::TextField> textField1;
 
 		//Lightsources and their debug rendering (wireframed)
-		std::shared_ptr<LightingSystem> lights;
-		std::vector<Model> primitives;
+		std::shared_ptr<lighting::LightingSystem> lights;
+		std::vector<models::Model> primitives;
 
 		//for time intervals
 		GLdouble lastFrame;
