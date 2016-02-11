@@ -414,9 +414,6 @@ GLboolean REngine::renderingLoop()
 
 		glfwSetWindowTitle(window, ("3D Scene Viewer [fps:" + std::to_string((GLuint)ceil(1.0 / deltaTime)) + "]").c_str());
 
-		if (AsyncModelLoader::instance()->isDone())
-			checkLoadedModels();
-
 		//----Inputs
 		//---One-time ations, right upon the key release
 		if (Inputs::instance()->isKeyReleased(GLFW_KEY_ESCAPE)) //Close window
@@ -665,14 +662,14 @@ void REngine::addContextsForModel(const std::string& modelId, std::vector<std::s
 
 void REngine::addModel(Model& model)
 {
-	models.push_back(model);
-
 	//applies contexts to their models, because some context might have a lasting effect on the model's state
 	//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
 	std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[model.getID()];
 
 	for (GLuint j = 0; j < currentMContexts.size(); ++j)
 		currentMContexts[j]->applyContextStateToModel(model);
+
+	models.push_back(model);
 }
 
 void REngine::blendingOn()
@@ -738,24 +735,5 @@ void REngine::scriptedMovements()
 			ourHeroOurHero->setTranslation(glm::vec3(5.25f * sin(0.5f * (GLfloat)glfwGetTime()), 0.0f, 5.25f * cos(0.5f * (GLfloat)glfwGetTime())), 0);
 			ourHeroOurHero->setRotation(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f + 90.0f * (GLfloat)glfwGetTime(), 0);
 		}
-	}
-}
-
-void REngine::checkLoadedModels()
-{
-	while (modelQueue.size() > 0)
-	{
-		AsyncData& vertexData = modelQueue[modelQueue.size() - 1];
-		Model mdl1(vertexData);
-		modelQueue.pop_back();
-
-		//applies contexts to their models, because some context might have a lasting effect on the model's state
-		//Like batch rendering context caches transforms, for batch rendering multiple model instances with one render calls, into VAO		
-		std::vector<std::shared_ptr<ModelRenderingContext>> currentMContexts = modelContexts[mdl1.getID()];
-
-		for (GLuint j = 0; j < currentMContexts.size(); ++j)
-			currentMContexts[j]->applyContextStateToModel(mdl1);
-
-		models.push_back(mdl1);
 	}
 }

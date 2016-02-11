@@ -76,7 +76,6 @@ namespace engine
 		void clearScreen();
 		void renderCalls(const GLuint shaderProgram, const GLuint batchShaderProgram, const GLuint outlineShader, const GLuint outlineBatchShader, const GLuint lightSourceShader);
 		void scriptedMovements();
-		void checkLoadedModels();
 
 		//viewPort dimesnsions
 		GLuint screenWidth = 1280;
@@ -94,7 +93,6 @@ namespace engine
 		//Model data
 		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> modelContexts;
 		std::vector<models::Model> models;
-		std::vector<models::AsyncData> modelQueue;
 
 		std::shared_ptr<renderables::SkyBox> skyBox;
 

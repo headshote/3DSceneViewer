@@ -191,7 +191,8 @@ void checkLoadedModels(std::vector<models::AsyncData>& modelQueue, engine::REngi
 {
 	while (modelQueue.size() > 0)
 	{
-		models::AsyncData* vertexData = &modelQueue[modelQueue.size() - 1];
+		GLuint lastId = modelQueue.size() - 1;
+		models::AsyncData* vertexData = &modelQueue[lastId];
 		models::Model mdl1(*vertexData);
 		modelQueue.pop_back();
 
@@ -209,7 +210,8 @@ int main()
 
 	while (theEngine.renderingLoop())
 	{
-		checkLoadedModels(modelQueue, theEngine);
+		if (models::AsyncModelLoader::instance()->isDone())
+			checkLoadedModels(modelQueue, theEngine);
 	}
 
 	return EXIT_SUCCESS;
