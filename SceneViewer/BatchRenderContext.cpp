@@ -2,6 +2,11 @@
 
 using namespace models;
 
+BatchRenderContext::BatchRenderContext()
+{
+
+}
+
 BatchRenderContext::BatchRenderContext(std::vector<glm::vec3>& translations, std::vector<glm::vec3>& scales, std::vector<glm::vec3>& rotationAxes, std::vector<GLfloat>& angles, GLboolean cull)
 {
 	if (translations.size() != scales.size() ||

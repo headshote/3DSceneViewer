@@ -137,7 +137,6 @@ void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& the
 	//0
 	std::string nanoPath = "models/nanosuit/nanosuit.obj";
 	asyncLoader.loadModel(&nanoPath, modelQueue);
-	//models.push_back(Model("models/nanosuit/nanosuit.obj"));
 
 	//1
 	GLuint grassTexture[] = { models::loadTexture("textures/grass.png", true, false), models::loadTexture("textures/mt_specular.png") };
@@ -210,7 +209,8 @@ int main()
 
 	loadModels(&modelQueue, theEngine, asyncLoader);
 
-	scenes::SceneParser::getInstance()->parseFile("scenes/default.scn");
+	scenes::SceneParser::getInstance()->setEngine(&theEngine);
+	scenes::SceneParser::getInstance()->parseFile("scenes/default.scn", &modelQueue);
 
 	while (theEngine.renderingLoop())
 	{

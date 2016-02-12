@@ -2,6 +2,11 @@
 
 using namespace models;
 
+SingleCallContext::SingleCallContext()
+{
+
+}
+
 SingleCallContext::SingleCallContext(glm::vec3& translation, glm::vec3& scale, glm::vec3& rotationAxis, GLfloat angle, GLboolean cull)
 {
 	appendTranslation(translation);
