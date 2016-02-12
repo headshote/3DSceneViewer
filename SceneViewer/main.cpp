@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "REngine.h"
+#include "SceneParser.h"
 
 static GLfloat transparentVertices[] = {
 	// Positions		//Normals					// Texture Coords (swapped y coordinates because texture is flipped upside down)
@@ -208,6 +209,8 @@ int main()
 	std::vector<models::AsyncData> modelQueue;
 
 	loadModels(&modelQueue, theEngine, asyncLoader);
+
+	scenes::SceneParser::getInstance()->parseFile("scenes/default.scn");
 
 	while (theEngine.renderingLoop())
 	{
