@@ -11,15 +11,15 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLcha
 	GLboolean geometryAvailable = geometryPath != nullptr;
 
 	//read shader code into a string from the files
-	std::shared_ptr<std::string> vsting( readFile(vertexPath) );
-	std::shared_ptr<std::string> fsting( readFile(fragmentPath) );
-	const GLchar* vShaderCode = vsting->c_str();
-	const GLchar* fShaderCode = fsting->c_str();
+	std::string vsting = readFile(vertexPath);
+	std::string fsting = readFile(fragmentPath);
+	const GLchar* vShaderCode = vsting.c_str();
+	const GLchar* fShaderCode = fsting.c_str();
 
 	if (geometryAvailable)
 	{
-		std::shared_ptr<std::string> gsting(readFile(geometryPath));
-		const GLchar* gShaderCode = gsting->c_str();
+		std::string gsting = readFile(geometryPath);
+		const GLchar* gShaderCode = gsting.c_str();
 		geometry = compileShader(&gShaderCode, GL_GEOMETRY_SHADER, geometryPath);
 	}
 

@@ -6,5 +6,5 @@
 
 namespace utils
 {
-	std::string* readFile(const GLchar* filePath);
+	std::string readFile(const GLchar* filePath);
 }

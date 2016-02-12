@@ -23,6 +23,7 @@ SceneParser::~SceneParser()
 
 void SceneParser::parseFile(const std::string& filename)
 {
+	std::string fileContents = utils::readFile(filename.c_str());
 
 	sceneContexts["models/nanosuit/nanosuit.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 	sceneContexts["grass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();

@@ -1,9 +1,9 @@
 #include "utils.h"
 
-std::string* utils::readFile(const GLchar* filePath)
+std::string utils::readFile(const GLchar* filePath)
 {
 	// 1. Retrieve the vertex/fragment source code from filePath
-	std::string* fileContents = nullptr;
+	std::string fileContents;
 	std::ifstream theFile;
 
 	// ensures ifstream objects can throw exceptions:
@@ -20,7 +20,7 @@ std::string* utils::readFile(const GLchar* filePath)
 		// close file handlers
 		theFile.close();
 		// Convert stream into GLchar array
-		fileContents = new std::string(fileStream.str());
+		fileContents = std::string(fileStream.str());
 	}
 	catch (std::ifstream::failure e)
 	{
