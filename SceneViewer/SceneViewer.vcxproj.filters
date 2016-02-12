@@ -77,9 +77,11 @@
     <ClCompile Include="REngine.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="SceneParser.cpp" />
     <ClCompile Include="utils.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneParser.cpp">
+      <Filter>scenes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,9 +157,11 @@
     <ClInclude Include="REngine.h">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="SceneParser.h" />
     <ClInclude Include="utils.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneParser.h">
+      <Filter>scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,15 +2,6 @@
 
 using namespace models;
 
-/*static*/ std::shared_ptr<AsyncModelLoader> AsyncModelLoader::theInstance;
-
-/*static*/ std::shared_ptr<AsyncModelLoader> AsyncModelLoader::instance()
-{
-	if (!theInstance.get())
-		theInstance.reset(new AsyncModelLoader());
-	return theInstance;
-}
-
 AsyncModelLoader::AsyncModelLoader()
 {
 }

@@ -21,22 +21,18 @@ SceneParser::~SceneParser()
 {
 }
 
-std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> parseFile(const std::string& filename)
+void SceneParser::parseFile(const std::string& filename)
 {
-	std::map<std::string, std::vector<std::shared_ptr<ModelRenderingContext>>> modelContexts;
 
+	sceneContexts["models/nanosuit/nanosuit.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["grass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["glass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["models/rock/rock.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["models/planet/planet.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["floor1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["brick1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["brick2"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["brick3"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
+	sceneContexts["wood1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 
-
-	modelContexts["models/nanosuit/nanosuit.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["grass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["glass1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["models/rock/rock.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["models/planet/planet.obj"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["floor1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick2"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["brick3"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-	modelContexts["wood1"] = std::vector<std::shared_ptr<ModelRenderingContext>>();
-
-	return modelContexts;
 }

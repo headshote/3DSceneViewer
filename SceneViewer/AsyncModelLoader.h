@@ -42,9 +42,8 @@ namespace models
 	class AsyncModelLoader
 	{
 	public:
+		AsyncModelLoader();
 		~AsyncModelLoader();
-
-		static std::shared_ptr<AsyncModelLoader> instance();
 
 		void loadModel(const std::string* filePath, std::vector<AsyncData>* results);
 
@@ -57,16 +56,12 @@ namespace models
 		GLboolean isDone();
 
 	private:
-		static std::shared_ptr<AsyncModelLoader> theInstance;
-
 		void asyncLoadCall(const std::string* fPath, std::vector<AsyncData>* results);
 
 		std::mutex mtx;
 
 		std::vector<std::thread> threads;
 		std::vector<GLboolean> completedRequests;
-
-		AsyncModelLoader();
 	};
 
 	void processNode(aiNode* node, const aiScene* scene, AsyncData& modelhData, const std::string& modelRootDir);

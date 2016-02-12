@@ -129,13 +129,13 @@ void createContexts(std::vector<models::Model>& models, engine::REngine& theEngi
 /**
 * List of the models to load at the beginning of the program should be in the scene file
 */
-void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& theEngine)
+void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& theEngine, models::AsyncModelLoader& asyncLoader)
 {
 	std::vector<models::Model> models;
 
 	//0
 	std::string nanoPath = "models/nanosuit/nanosuit.obj";
-	models::AsyncModelLoader::instance()->loadModel(&nanoPath, modelQueue);
+	asyncLoader.loadModel(&nanoPath, modelQueue);
 	//models.push_back(Model("models/nanosuit/nanosuit.obj"));
 
 	//1
@@ -148,11 +148,11 @@ void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& the
 
 	//3
 	std::string rockPath = "models/rock/rock.obj";
-	models::AsyncModelLoader::instance()->loadModel(&rockPath, modelQueue);
+	asyncLoader.loadModel(&rockPath, modelQueue);
 
 	////4
 	std::string planetPath = "models/planet/planet.obj";
-	models::AsyncModelLoader::instance()->loadModel(&planetPath, modelQueue);
+	asyncLoader.loadModel(&planetPath, modelQueue);
 
 	//5
 	GLuint metalTexture[] = { models::loadTexture("textures/metal1.jpg", false, false), models::loadTexture("textures/metal1_specular.png") };
@@ -204,13 +204,14 @@ int main()
 {
 	engine::REngine theEngine;
 
+	models::AsyncModelLoader asyncLoader;
 	std::vector<models::AsyncData> modelQueue;
 
-	loadModels(&modelQueue, theEngine );
+	loadModels(&modelQueue, theEngine, asyncLoader);
 
 	while (theEngine.renderingLoop())
 	{
-		if (models::AsyncModelLoader::instance()->isDone())
+		if (asyncLoader.isDone())
 			checkLoadedModels(modelQueue, theEngine);
 	}
 

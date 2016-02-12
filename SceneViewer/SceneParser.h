@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "ModelRenderingContext.h"
+#include "utils.h"
 
 namespace scene
 {
@@ -14,13 +15,17 @@ namespace scene
 	public:
 		static std::shared_ptr<SceneParser> getInstance();
 
-		SceneParser();
 		~SceneParser();
 
-		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> parseFile(const std::string& filename);
+		void parseFile(const std::string& filename);
 
 	private:
 		static std::shared_ptr<SceneParser> instance;
+
+		SceneParser();
+
+		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> sceneContexts;
+		std::vector<models::Model> sceneModels;
 
 	};
 }
