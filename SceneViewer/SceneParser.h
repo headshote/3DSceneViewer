@@ -1,9 +1,12 @@
 #pragma once
 
+#include <stdlib.h>
+
 #include <map>
 #include <string>
 #include <vector>
 #include <memory>
+#include <glm/glm.hpp>
 
 #include "ModelRenderingContext.h"
 #include "SingleCallContext.h"
@@ -36,15 +39,34 @@ namespace scenes
 		std::string getLine(const std::string& fileContents);
 		void parseLine(const std::string& fileLine);
 
-		std::string currentModelId;
+		void getQuotes(const std::string& fileLine);
 
+		std::vector<float> parseVector(const std::string& content);
+
+		//parsing state vars
 		unsigned long fileCursor;
 
+		unsigned int lineCursor;
+
+		int firstQuoteId;
+		int secondQuoteId;
+
+		glm::vec3 curTranslation;
+		glm::vec3 curRotAxis;
+		glm::vec3 curScale;
+		float curRotAngle;
+		int cutTransformId;
+
+		std::string currentModelId;
+
+		//model loading module
 		models::AsyncModelLoader asyncLoader;
 
+		//engine/client interaction vars
 		engine::REngine* theEngine;
 		std::vector<models::AsyncData>* modelQueue;
 
+		//the goodies data storage
 		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> sceneContexts;
 		std::vector<models::Model> sceneModels;
 

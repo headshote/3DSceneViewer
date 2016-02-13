@@ -2,7 +2,7 @@
 
 using namespace models;
 
-ModelRenderingContext::ModelRenderingContext()
+ModelRenderingContext::ModelRenderingContext() : cullFaces(true)
 {
 
 }
