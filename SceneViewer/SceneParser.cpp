@@ -21,6 +21,11 @@ SceneParser::~SceneParser()
 {
 }
 
+bool SceneParser::isLoaderDone()
+{
+	return asyncLoader.isDone();
+}
+
 void SceneParser::parseFile(const std::string& filename, std::vector<models::AsyncData>* mQueue)
 {
 	modelQueue = mQueue;
@@ -34,7 +39,13 @@ void SceneParser::parseFile(const std::string& filename, std::vector<models::Asy
 		parseLine(fileLine);
 		//std::cout << fileLine << "\n";
 	}
-	return;
+
+	for (auto iterator = sceneContexts.begin(); iterator != sceneContexts.end(); iterator++)
+	{
+		theEngine->addContextsForModel(iterator->first, iterator->second);
+		// iterator->first = key
+		// iterator->second = value
+	}
 }
 
 void SceneParser::parseLine(const std::string& fileLine)
@@ -48,7 +59,7 @@ void SceneParser::parseLine(const std::string& fileLine)
 		char curChr = fileLine.at(lineCursor);
 		parsedContent += curChr;
 
-		if (curChr == ' '|| curChr == '\t')	//word-by-word analysys, refresh parsing after meeting a space
+		if (curChr == ' '|| curChr == '\t')	//word-by-word analysis, refresh parsing after meeting a space
 		{
 			parsedContent = "";
 		}
@@ -57,6 +68,8 @@ void SceneParser::parseLine(const std::string& fileLine)
 		{
 			getQuotes(fileLine);
 			currentModelId = fileLine.substr(firstQuoteId + 1, secondQuoteId - firstQuoteId-1);
+
+			asyncLoader.loadModel(&currentModelId, modelQueue);
 
 			sceneContexts[currentModelId] = std::vector<std::shared_ptr<ModelRenderingContext>>();
 			return;
@@ -187,9 +200,4 @@ void SceneParser::setEngine(engine::REngine* eng)
 std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> SceneParser::getContexts()
 {
 	return sceneContexts;
-}
-
-std::vector<models::Model> SceneParser::getModels()
-{
-	return sceneModels;
 }

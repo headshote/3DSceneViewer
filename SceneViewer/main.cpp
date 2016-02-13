@@ -52,55 +52,6 @@ void createContexts(std::vector<models::Model>& models, engine::REngine& theEngi
 	modelContexts["brick3"] = std::vector<std::shared_ptr<models::ModelRenderingContext>>();
 	modelContexts["wood1"] = std::vector<std::shared_ptr<models::ModelRenderingContext>>();
 
-	std::vector<glm::vec3> translations;
-	std::vector<glm::vec3> scales(25 + 45 + 70, glm::vec3(0.33f));;
-	std::vector<glm::vec3> rotationAxes;
-	std::vector<GLfloat> rotationAngles;
-	for (GLuint i = 0; i < 25; i++)
-	{
-		translations.push_back(glm::vec3(8.0f * sin(0.25f * (GLfloat)i), 0.0f, 8.0f * cos(0.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	for (GLuint i = 0; i < 45; i++)
-	{
-		translations.push_back(glm::vec3(20.0f * sin(0.14f * (GLfloat)i), 1.0f, 20.0f * cos(0.14f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	for (GLuint i = 0; i < 70; i++)
-	{
-		translations.push_back(glm::vec3(30.0f * sin(0.09f * (GLfloat)i), 2.0f, 30.0f * cos(0.09f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	modelContexts["models/nanosuit/nanosuit.obj"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::SingleCallContext(glm::vec3(1.0f, 0.0f, -2.0f), glm::vec3(0.33f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f)));
-	modelContexts["models/nanosuit/nanosuit.obj"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
-	std::vector<glm::vec3>().swap(translations);
-	std::vector<glm::vec3>(25, glm::vec3(1.0f)).swap(scales);
-	std::vector<glm::vec3>().swap(rotationAxes);
-	std::vector<GLfloat>().swap(rotationAngles);
-	for (GLuint i = 0; i < 25; i++)
-	{
-		translations.push_back(glm::vec3(15.75f * sin(0.25f * (GLfloat)i), 4.0f, 15.75f * cos(0.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
-		rotationAngles.push_back(30.0f + 45.0f * i);
-	}
-	modelContexts["models/rock/rock.obj"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
-	std::vector<glm::vec3>().swap(translations);
-	std::vector<glm::vec3>(5, glm::vec3(1.0f)).swap(scales);
-	std::vector<glm::vec3>().swap(rotationAxes);
-	std::vector<GLfloat>().swap(rotationAngles);
-	for (GLuint i = 0; i < 5; i++)
-	{
-		translations.push_back(glm::vec3(12.75f * sin(5.25f * (GLfloat)i), 4.0f, 12.75f * cos(5.25f * (GLfloat)i)));
-		rotationAxes.push_back(glm::vec3(0.5f, 0.5f, 0.0f));
-		rotationAngles.push_back(45.0f + 2.0f * i);
-	}
-	modelContexts["models/planet/planet.obj"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::BatchRenderContext(translations, scales, rotationAxes, rotationAngles)));
-
 	modelContexts["grass1"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::SingleCallContext(glm::vec3(-1.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
 	modelContexts["glass1"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::SingleCallContext(glm::vec3(0.5f, 0.0f, -0.48f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
 	modelContexts["floor1"].push_back(std::shared_ptr<models::ModelRenderingContext>(new models::SingleCallContext(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(1.0f, 0.0f, 0.0f), 0.0f, false)));
@@ -120,7 +71,8 @@ void createContexts(std::vector<models::Model>& models, engine::REngine& theEngi
 		theEngine.addModel(model);
 	}
 
-	for (auto iterator = modelContexts.begin(); iterator != modelContexts.end(); iterator++) {
+	for (auto iterator = modelContexts.begin(); iterator != modelContexts.end(); iterator++) 
+	{
 		theEngine.addContextsForModel(iterator->first, iterator->second);
 		// iterator->first = key
 		// iterator->second = value
@@ -130,14 +82,10 @@ void createContexts(std::vector<models::Model>& models, engine::REngine& theEngi
 /**
 * List of the models to load at the beginning of the program should be in the scene file
 */
-void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& theEngine, models::AsyncModelLoader& asyncLoader)
+void createModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& theEngine)
 {
 	std::vector<models::Model> models;
-
-	//0
-	std::string nanoPath = "models/nanosuit/nanosuit.obj";
-	asyncLoader.loadModel(&nanoPath, modelQueue);
-
+	
 	//1
 	GLuint grassTexture[] = { models::loadTexture("textures/grass.png", true, false), models::loadTexture("textures/mt_specular.png") };
 	models.push_back(models::Model(new renderables::Mesh(transparentVertices, sizeof(transparentVertices), grassTexture, sizeof(grassTexture) / sizeof(GLuint)), "grass1"));
@@ -145,14 +93,6 @@ void loadModels(std::vector<models::AsyncData>* modelQueue, engine::REngine& the
 	//2
 	GLuint glassTexture[] = { models::loadTexture("textures/blending_transparent_window.png", false, false), models::loadTexture("textures/mt_specular.png") };
 	models.push_back(models::Model(new renderables::Mesh(transparentVertices, sizeof(transparentVertices), glassTexture, sizeof(glassTexture) / sizeof(GLuint), 0), "glass1"));
-
-	//3
-	std::string rockPath = "models/rock/rock.obj";
-	asyncLoader.loadModel(&rockPath, modelQueue);
-
-	////4
-	std::string planetPath = "models/planet/planet.obj";
-	asyncLoader.loadModel(&planetPath, modelQueue);
 
 	//5
 	GLuint metalTexture[] = { models::loadTexture("textures/metal1.jpg", false, false), models::loadTexture("textures/metal1_specular.png") };
@@ -204,17 +144,16 @@ int main()
 {
 	engine::REngine theEngine;
 
-	models::AsyncModelLoader asyncLoader;
 	std::vector<models::AsyncData> modelQueue;
 
-	loadModels(&modelQueue, theEngine, asyncLoader);
+	createModels(&modelQueue, theEngine);
 
 	scenes::SceneParser::getInstance()->setEngine(&theEngine);
 	scenes::SceneParser::getInstance()->parseFile("scenes/default.scn", &modelQueue);
 
 	while (theEngine.renderingLoop())
 	{
-		if (asyncLoader.isDone())
+		if (scenes::SceneParser::getInstance()->isLoaderDone())
 			checkLoadedModels(modelQueue, theEngine);
 	}
 

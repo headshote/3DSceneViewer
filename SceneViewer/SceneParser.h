@@ -26,9 +26,10 @@ namespace scenes
 		void parseFile(const std::string& filename, std::vector<models::AsyncData>* mQueue);
 
 		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> getContexts();
-		std::vector<models::Model> getModels();
 
 		void setEngine(engine::REngine* eng);
+
+		bool isLoaderDone();
 
 	private:
 		static std::shared_ptr<SceneParser> instance;
@@ -68,7 +69,6 @@ namespace scenes
 
 		//the goodies data storage
 		std::map<std::string, std::vector<std::shared_ptr<models::ModelRenderingContext>>> sceneContexts;
-		std::vector<models::Model> sceneModels;
 
 	};
 }
